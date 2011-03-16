@@ -9,6 +9,10 @@ BinHeap.prototype = {
 		this.bubbleUp(this.data.length - 1)
 	},
 	
+	isEmpty: function() {
+		return (this.data.length === 0);
+	},
+	
 	pop: function() {
 		var result = this.data[0];
 		var end = this.data.pop();

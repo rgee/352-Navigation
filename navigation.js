@@ -1,7 +1,77 @@
-function Node(state, parent, action) {
+var agent = new Object();
+var worldGrid = new Object();
+
+/* Helper function for creating a 2-D Array (Grid) */
+function Grid(rows, cols){
+	for(var x = 0; x < rows; ++x){
+		this[x] = new Array(cols);
+		for(var y = 0; y < cols; ++y){
+			this[x][y] = 0;
+		}
+	}
+}
+
+/* An agent in the world. */
+function Agent(position, velocity) {
+	this.position = position;
+	this.velocity = velocity;
+	this.target = position;
+	this.speed = 20;
+}
+Agent.prototype = {
+	update: function() {
+		var dist = this.target.distanceFrom(this.position);
+		
+		/* Fail out for tiny movement requests so as to avoid weird numerical
+		   instability issues. */
+		if(dist <= 0.001) return;
+		this.position = this.position.add(this.velocity.multiply(dist* (1 / this.speed)));
+		
+	}
+};
+
+/* The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
+   at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. */
+function WorldGrid(cellSize, xMax, yMax) {
+	this.xMax = xMax;
+	this.yMax = yMax;
+	this.nRows = yMax / cellSize;
+	this.nCols = xMax / cellSize;
+	this.data = new Grid(this.nRows, this.nCols);
+}
+
+WorldGrid.prototype = {
+	/* Add an object at position pos. */
+	addObject: function(pos) {
+		var row = Math.floor((this.nRows * (pos.e(2) / this.yMax)));
+		var col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
+		this.data[row][col] = 1;
+	},
+	
+	/* Remove an object at position pos. */
+	removeObject: function(pos) {
+		var row = Math.floor((this.nRows * (pos.e(2) / this.yMax)));
+		var col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
+		this.data[row][col] = 0;
+	},
+	
+	/* Takes a row and a column and returns true if the cell at that position
+	   is on the world grid and false otherwise. */
+	isInWorld: function(row, col) {
+	
+	},
+	
+	/* Takes a row and column and returns an array of valid (row,col) pairs
+	   if they are on the world grid. */
+	adjacentCells: function(row, col) {
+
+	}
+};
+
+/* A node in the search tree. Stores heuristic data as well as parent info. */
+function Node(state, parent) {
 	this.state = state;
 	this.parent = parent;
-	this.action = action;
 	this.h = 0;
 	this.g = 0;
 }
@@ -13,9 +83,39 @@ Node.prototype = {
 		var len = results.length;
 		var i;
 		for(i = 0; i < len; i++) {
-			successors.push(new Node(results[i][0], this, result[i][1]));
+			successors.push(new Node(results[i], this));
 		}
 		return successors;
+	}
+};
+
+function GridNavState(row, col, grid) {
+	this.row = row;
+	this.col = col;
+	this.grid = grid;
+}
+
+GridNavState.prototype = {
+	/* Returns an array of states if they represent cells that are are adjacent to the current
+	   cell and not obstructed. */
+	applyOperators: function(){
+		var results = new Array();
+		results.push([row -1, col], [row +1, col], [row, col -1], [row, col +1]);
+		
+		var currentRow, currentCol;
+		for(var i = 0; i < results.length; ++i){
+			currentRow = (results[i])[0];
+			currentCol = (results[i])[1];
+			
+			/* Filter out invalid moves and construct states from valid ones. */
+			if(!this.grid.isInWorld(currentRow, currentCol) || 
+			    this.grid.data[currentRow][currentCol] === undefined){
+				results.splice(i,1);
+			} else {
+				results[i] = new GridNavState(currentRow, currentCol, this.grid);
+			}
+		}
+		return results;
 	}
 };
 
@@ -32,7 +132,7 @@ function heuristicSearch(initialState, goalState, fringe, heuristic){
 		current = fringe.pop();
 		if(current.state === goalState){
 			console.log("Found Solution");
-			return;
+			return current;
 		}
 		else if(!closedStates.contains(current.state)){
 			closedStates.add(current.state);
@@ -48,4 +148,57 @@ function heuristicSearch(initialState, goalState, fringe, heuristic){
 		}
 	}
 	console.log("Solution not found.");
+	return null;
 }
+
+function draw(proc){
+	proc.draw = function(){
+		this.background(20);
+		this.fill = 200;
+		this.stroke = 0;
+		agent.update();
+		this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+	};
+	
+	proc.mousePressed = function() {
+		var target = $V([this.mouseX, this.mouseY]);
+		agent.target = target;
+		agent.velocity = agent.target.subtract(agent.position).toUnitVector();
+	}
+	
+	proc.keyPressed = function(){
+		
+	}
+	
+	proc.drawObstacles = function(grid) {
+		for(var x = 0; x < grid.nCols; ++x){
+			for(var y = 0; y < grid.nRows; ++y) {
+				if(grid[x][y]){
+					// TODO: Obstacle here. Draw that sucker!
+				}
+			}
+		}
+	}
+}
+
+function testHeap(){
+	/* From the looks of this, the heap is working properly. */
+	var heap = new BinHeap(function(u) { return u; });
+	heap.push(1);
+	heap.push(3);
+	heap.push(2);
+	heap.push(-1);
+	heap.push(4);
+	while(!heap.isEmpty()){
+		console.log(heap.pop());
+	}
+}
+
+$(document).ready(function(){
+	agent = new Agent($V([300,400]), $V([0,0]));
+	worldGrid = new WorldGrid(10, 800, 600);
+	var proc = new Processing(document.getElementById('display'), draw);
+	proc.size(800,600);
+	
+	testHeap();
+});

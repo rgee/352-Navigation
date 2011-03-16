@@ -1,1 +1,7 @@
- 
+ body{
+	background: #E0E0E0;
+ }
+ #content{
+	font-family: Helvetica;
+	text-align: center;
+ }

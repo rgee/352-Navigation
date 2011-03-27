@@ -12,11 +12,13 @@ function Grid(rows, cols){
 }
 
 /* An agent in the world. */
-function Agent(position, velocity) {
+function Agent(position, velocity, width, height) {
 	this.position = position;
 	this.velocity = velocity;
 	this.target = position;
 	this.speed = 20;
+	this.size = [width, height];
+	this.heading = Math.PI /2;
 }
 Agent.prototype = {
 	update: function() {
@@ -43,8 +45,9 @@ function WorldGrid(cellSize, xMax, yMax) {
 WorldGrid.prototype = {
 	/* Add an object at position pos. */
 	addObject: function(pos) {
-		var row = Math.floor((this.nRows * (pos.e(2) / this.yMax)));
-		var col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
+		var row = Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)));
+		var col = Math.floor(((this.nCols -1) * (pos.e(1) / this.xMax)));
+		console.log(row + " " + col);
 		this.data[row][col] = 1;
 	},
 	
@@ -157,7 +160,11 @@ function draw(proc){
 		this.fill = 200;
 		this.stroke = 0;
 		agent.update();
-		this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+
+		var agentX = agent.position.e(1),
+			agentY = agent.position.e(2);
+		this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
+		this.drawObstacles(worldGrid);
 	};
 	
 	proc.mousePressed = function() {
@@ -171,10 +178,15 @@ function draw(proc){
 	}
 	
 	proc.drawObstacles = function(grid) {
-		for(var x = 0; x < grid.nCols; ++x){
-			for(var y = 0; y < grid.nRows; ++y) {
-				if(grid[x][y]){
-					// TODO: Obstacle here. Draw that sucker!
+		var cellWidth = this.width / grid.nCols;
+		var cellHeight = this.height / grid.nRows;
+		this.fill = 125;
+
+		for(var y = 0; y < grid.nRows; ++y){
+			for(var x = 0; x < grid.nCols; ++x) {
+
+				if(grid.data[y][x]){
+					this.rect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
 				}
 			}
 		}
@@ -195,10 +207,13 @@ function testHeap(){
 }
 
 $(document).ready(function(){
-	agent = new Agent($V([300,400]), $V([0,0]));
 	worldGrid = new WorldGrid(10, 800, 600);
+	worldGrid.addObject(Vector.create([0,0]));
+	worldGrid.addObject(Vector.create([400,300]));
+	worldGrid.addObject(Vector.create([800,600]));
+
 	var proc = new Processing(document.getElementById('display'), draw);
-	proc.size(800,600);
-	
-	testHeap();
+	proc.size(800,600);	
+
+    agent = new Agent(Vector.create([300,400]), Vector.create([0,0]), proc.width/worldGrid.nCols, proc.height/worldGrid.nRows);
 });

@@ -37,13 +37,17 @@
 		/* Takes a row and a column and returns true if the cell at that position
 		   is on the world grid and false otherwise. */
 		isInWorld: function(row, col) {
-		
+			return !(row < 0 || row > this.yMax) || (col < 0 || col > this.xMax);
 		},
 		
 		/* Takes a row and column and returns an array of valid (row,col) pairs
 		   if they are on the world grid. */
 		adjacentCells: function(row, col) {
 
+		},
+		toGridSpace: function(pos){
+			return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
+								   Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
 		}
 	};
 

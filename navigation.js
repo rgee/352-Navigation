@@ -86,5 +86,5 @@ $(document).ready(function(){
 	var proc = new Processing(document.getElementById('display'), draw);
 	proc.size(800,600);	
 
-    agent = new Nav.Agent(Vector.create([300,400]), Vector.create([0,0]), proc.width/worldGrid.nCols, proc.height/worldGrid.nRows);
+    agent = new Nav.Agent(Vector.create([300,400]), Vector.create([0,0]), proc.width/worldGrid.nCols, proc.height/worldGrid.nRows, worldGrid, false);
 });

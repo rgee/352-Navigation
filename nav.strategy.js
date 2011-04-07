@@ -14,7 +14,12 @@
 			this.agent = agent;
 
 		}
-		Dynamical.prototype = {};
+		Dynamical.prototype = {
+			execute: function(){
+				/* This function should probably only update the agent's heading angle at every call,
+				   based on the dynamical system. */
+			}
+		};
 		Strategy.Dynamical = Dynamical;
 	})(Strategy);
 
@@ -51,16 +56,18 @@
 			   cell and not obstructed. */
 			applyOperators: function(){
 				var results = new Array();
-				results.push([row -1, col], [row +1, col], [row, col -1], [row, col +1]);
+				results.push([this.col-1, this.row], [this.col +1, this.row], [this.col, this.row -1], [this.col, this.row +1]);
 				
+				var gridSpaceVec;
 				var currentRow, currentCol;
 				for(var i = 0; i < results.length; ++i){
-					currentRow = (results[i])[0];
-					currentCol = (results[i])[1];
-					
+					gridSpaceVec = this.grid.toGridSpace(Vector.create(results[i]));
+					currentRow = (results[i])[1];
+					currentCol = (results[i])[0];
+
 					/* Filter out invalid moves and construct states from valid ones. */
 					if(!this.grid.isInWorld(currentRow, currentCol) || 
-					    this.grid.data[currentRow][currentCol] === undefined){
+					    this.grid.data[gridSpaceVec.e(1)][gridSpaceVec.e(0)] === 1){
 						results.splice(i,1);
 					} else {
 						results[i] = new GridNavState(currentRow, currentCol, this.grid);
@@ -89,10 +96,12 @@
 					closedStates.add(current.state);
 					if(nodesExpanded < maxExpansions){
 						new_nodes = current.expand();
-						nodes_expanded += (new_nodes.length ? 1 : 0);
+						nodesExpanded += (new_nodes.length ? 1 : 0);
 						for(var i = 0; i < new_nodes.length; i++){
+							//console.log(new_nodes[i]);
 							new_nodes[i].g = current.g + 1;
 							new_nodes[i].h = heuristic(new_nodes[i].state, goalState);
+							
 							fringe.push(new_nodes[i]);
 						}
 					}
@@ -104,11 +113,61 @@
 
 		/* A* navigation strategy object */
 		function AStar(agent){
+			// The agent this strategy instance belongs to.
 			this.agent = agent;
 
+			// The initial state based on the agent's current position.
+			// FIX: Right now agent.position is in world-space coordinates not grid space, so this will
+			//      produce strange results. Translate them later.
+			this.initial = new GridNavState(agent.position.e(1), agent.position.e(2), agent.world);
 
+			// The goal node.
+			this.goal = {};
+
+			// The path is just an array of nodes.
+			this.path = [];
 		}
-		AStar.prototype = {};
+		AStar.prototype = {
+			/* Generate the navigation path for the agent to follow */
+			plan: function(){
+				var result = heuristicSearch(
+								this.initial,
+								this.goal,
+								new BinHeap(function(node){return node.h + node.g;}),
+								function(state, goal){
+									// Use distance squared here since we don't care about the actual distance, just the
+									// comparison between two of them. 
+									return (Math.pow(state.col - goal.col, 2) + Math.pow(state.row - goal.row, 2));
+								});
+
+				if(result !== null){
+					while(result !== null){
+						this.path.unshift(result);
+						result = result.parent;
+					}
+				}
+			},
+			execute: function(goalCell){
+				/* Ideas for this implementation:
+				   This function should adjust the agent's target property, as the agent will
+				   logically always be moving to its target. If the agent has reached
+				   the target on a frame in which this is called, give it the next target if
+				   there is one. */
+
+				   this.goal = new GridNavState(goalCell.e(1), goalCell.e(2), this.agent.world);
+
+				   // Check if the agent has reached its target, if so we should return null here.
+
+				   if(this.path.length === 0){
+				       this.plan();
+				       if(this.path.length === 0){
+				           this.agent.target = null;
+				       } else {
+				        this.agent.target = this.path.shift();
+				       }
+				   }
+			}
+		};
 		Strategy.AStar = AStar;
 	})(Strategy);
 

@@ -15,12 +15,39 @@ function draw(proc){
 		var target = $V([this.mouseX, this.mouseY]);
 		agent.target = target;
 		agent.velocity = agent.target.subtract(agent.position).toUnitVector();
-	}
+	};
 	
 	proc.keyPressed = function(){
 		
-	}
-	
+	};
+
+    /**
+     * Visualize a path in a grid.
+     *
+     * Input: A path (list of vectors), a grid (you know what this is...)
+     */	
+    proc.drawPath = function(path, grid) {
+       var node = 0,
+           cellWidth = this.width / grid.nCols,
+           cellHeight = this.height / grid.nRows,
+           numNodes = path.length,
+           x, y,
+           nextX, nextY;
+
+        for(node; node < numNodes; node++){
+            x = path[node].e(1);
+            y = path[node].e(2);    
+
+            this.ellipse(x * cellWidth, y * cellHeight, 10, 10);
+            
+            if(node + 1 < numNodes) {
+                nextX = path[node+1].e(1);
+                nextY = path[node+1].e(2);
+                this.line(x * cellWidth, y * cellHeight, nextX * cellWidth, nextY * cellHeight);
+            }
+        }
+    };
+
 	proc.drawObstacles = function(grid) {
 		var cellWidth = this.width / grid.nCols;
 		var cellHeight = this.height / grid.nRows;

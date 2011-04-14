@@ -10,9 +10,8 @@
 	   classes that the strategies don't need to share */
 	(function(strategyObj){
 		/* Dynamical systems navigation strategy object */
-		function Dynamical(agent){
-			this.agent = agent;
-
+		function Dynamical(world){
+			this.world = world;
 		}
 		Dynamical.prototype = {
 			execute: function(){
@@ -111,61 +110,76 @@
 			return null;
 		}
 
+        /* Helper function for creating a 2-D Array (Grid) */
+        function Grid(rows, cols){
+            for(var x = 0; x < rows; ++x){
+                this[x] = new Array(cols);
+                for(var y = 0; y < cols; ++y){
+                    this[x][y] = 0;
+                }
+            }
+        }
+        /* The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
+           at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. */
+        function WorldGrid(cellSize, xMax, yMax) {
+            this.xMax = xMax;
+            this.yMax = yMax;
+            this.nRows = yMax / cellSize;
+            this.nCols = xMax / cellSize;
+            this.data = new Grid(this.nRows, this.nCols);
+        }
+
+        WorldGrid.prototype = {
+            /* Add an object at position pos. */
+            addObject: function(pos) {
+                var row = Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)));
+                var col = Math.floor(((this.nCols -1) * (pos.e(1) / this.xMax)));
+                this.data[row][col] = 1;
+            },
+            
+            /* Remove an object at position pos. */
+            removeObject: function(pos) {
+                var row = Math.floor((this.nRows * (pos.e(2) / this.yMax)));
+                var col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
+                this.data[row][col] = 0;
+            },
+            
+            /* Takes a row and a column and returns true if the cell at that position
+               is on the world grid and false otherwise. */
+            isInWorld: function(row, col) {
+                return !(row < 0 || row > this.yMax) || (col < 0 || col > this.xMax);
+            },
+            
+            /* Takes a row and column and returns an array of valid (row,col) pairs
+               if they are on the world grid. */
+            adjacentCells: function(row, col) {
+
+            },
+            toGridSpace: function(pos){
+                return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
+                                       Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
+            }
+        };
+
+
 		/* A* navigation strategy object */
-		function AStar(agent){
-			// The agent this strategy instance belongs to.
-			this.agent = agent;
-
-			// The initial state based on the agent's current position.
-			// FIX: Right now agent.position is in world-space coordinates not grid space, so this will
-			//      produce strange results. Translate them later.
-			this.initial = new GridNavState(agent.position.e(1), agent.position.e(2), agent.world);
-
-			// The goal node.
-			this.goal = {};
-
-			// The path is just an array of nodes.
-			this.path = [];
+		function AStar(world){
+            this.world = world;
+            
+            // Create the world grid here
+            this.grid = new WorldGrid(10,800,600);
+ 
+            for(var i = 0; i < this.world.agents.length; i++){
+                this.world.addObject(this.world.agents[i].position);
+            }
 		}
 		AStar.prototype = {
 			/* Generate the navigation path for the agent to follow */
 			plan: function(){
-				var result = heuristicSearch(
-								this.initial,
-								this.goal,
-								new BinHeap(function(node){return node.h + node.g;}),
-								function(state, goal){
-									// Use distance squared here since we don't care about the actual distance, just the
-									// comparison between two of them. 
-									return (Math.pow(state.col - goal.col, 2) + Math.pow(state.row - goal.row, 2));
-								});
-
-				if(result !== null){
-					while(result !== null){
-						this.path.unshift(result);
-						result = result.parent;
-					}
-				}
+				
 			},
-			execute: function(goalCell){
-				/* Ideas for this implementation:
-				   This function should adjust the agent's target property, as the agent will
-				   logically always be moving to its target. If the agent has reached
-				   the target on a frame in which this is called, give it the next target if
-				   there is one. */
+			execute: function(agent){
 
-				   this.goal = new GridNavState(goalCell.e(1), goalCell.e(2), this.agent.world);
-
-				   // Check if the agent has reached its target, if so we should return null here.
-
-				   if(this.path.length === 0){
-				       this.plan();
-				       if(this.path.length === 0){
-				           this.agent.target = null;
-				       } else {
-				        this.agent.target = this.path.shift();
-				       }
-				   }
 			}
 		};
 		Strategy.AStar = AStar;

@@ -105,6 +105,7 @@ def getPhiDot(agent):
 
 
 $(document).ready(function(){
+/*
 	worldGrid = new Nav.WorldGrid(10, 800, 600);
 	worldGrid.addObject(Vector.create([0,0]));
 	worldGrid.addObject(Vector.create([400,300]));
@@ -114,4 +115,5 @@ $(document).ready(function(){
 	proc.size(800,600);	
 
     agent = new Nav.Agent(Vector.create([300,400]), Vector.create([0,0]), proc.width/worldGrid.nCols, proc.height/worldGrid.nRows, worldGrid, false);
+*/
 });

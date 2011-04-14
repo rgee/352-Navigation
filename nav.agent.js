@@ -9,8 +9,6 @@
 		this.heading = Math.PI /2;
 		this.world = worldGrid;
 
-		this.strategy = dynamical ? new Nav.Strategy.Dynamical(this) :
-								    new Nav.Strategy.AStar(this);
 	}
 	Agent.prototype = {
 		update: function() {

@@ -16,7 +16,7 @@
 		Dynamical.prototype = {
 			sense: function(agent) {
                 perceivedObs = [];
-                for (int i = 0; i < obstacles.length(); i += 1) {
+                for (var i = 0; i < obstacles.length(); i += 1) {
                     /* need to turn wall representations into a series of 
                      * circles and then iterate through those potentially
                      */
@@ -26,7 +26,7 @@
                     var psi = agent.position.angleFrom(obstacles[i].position);
                     var dPsi
                 }
-            }
+            },
             
             execute: function(agent){
 				/* This function should probably only update the agent's heading angle at every call,

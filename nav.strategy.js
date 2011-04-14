@@ -58,7 +58,7 @@
 			}
 		};
 
-		function GridNavState(row, col, grid) {
+		function GridNavState(col,row, grid) {
 			this.row = row;
 			this.col = col;
 			this.grid = grid;
@@ -94,7 +94,7 @@
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
 			var maxExpansions = 3500;
 			var nodesExpanded = 0;
-			var start = new Node(initialState);
+			var start = new Node(initialState, null);
 			fringe.push(start);
 			var closedStates = new HashSet(function(u){return u;}, function(u,v){return u === v;});
 			var current;
@@ -175,7 +175,15 @@
             }
         };
 
-
+        var toPath = function(node){
+            var results = [node];
+            while(node = node.parent){
+                results.push(node); 
+            }
+            // Reverse array...is there a library function for this?
+            
+            return reuslts;
+        };
 		/* A* navigation strategy object */
 		function AStar(world){
             this.world = world;
@@ -193,7 +201,15 @@
 				
 			},
 			execute: function(agent){
+                // Re-Plan every time for now just to get the barebones implementation working.
+                var gridSpacePos = this.grid.toGridSpace(agent.position),
+                    gridSpaceTar = this.grid.toGridSpace(agent.target),
+                    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+                    target = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+                    fringe = new BinHeap(function(node){return node.h + node.g}),
+                    heuristic = function(u,v){return Math.pow((u.row - v.row),2) + Math.pow((u.col - v.col),2)};
 
+                agent.path = toPath(heuristicSearch(initial, target, fringe, heuristic));
 			}
 		};
 		Strategy.AStar = AStar;

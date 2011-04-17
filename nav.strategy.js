@@ -182,12 +182,16 @@
 			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
 		}
 
+		/**
+		 * Input: A node that is the final node in a search path.
+		 * Output: An array of vectors representing the path in grid space.
+		 */
 		function toPath(node){
 			var results = [$V([node.state.col, node.state.row])];
 			while(node = node.parent){
 				results.push($V([node.state.col, node.state.row]));
 			}
-			return results;
+			return results.reverse();
 		}
 
 		/* A* navigation strategy object */

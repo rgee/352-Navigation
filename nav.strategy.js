@@ -48,8 +48,10 @@
                 }
             }
         }
-        /* The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
-           at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. */
+        /**
+         * The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
+         * at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. 
+         */
         function WorldGrid(cellSize, xMax, yMax) {
             this.xMax = xMax;
             this.yMax = yMax;
@@ -88,7 +90,9 @@
             	}, this);
             	return final;
             },
-            // Gets the adjacent cells that are open.
+            /**
+             * Gets the adjacent cells that are open.
+             */
             adjacentOpenCells: function(col,row){
             	return this.adjacentCells(col,row).filter(function(elem){
             		return this.data[elem[0]][elem[1]] === 0;
@@ -101,7 +105,9 @@
         };
 
 
-		/* A node in the search tree. Stores heuristic data as well as parent info. */
+		/**
+		 * A node in the search tree. Stores heuristic data as well as parent info.
+		 */
 		function Node(state, parent) {
 			this.state = state;
 			this.parent = parent;
@@ -122,6 +128,9 @@
 			}
 		};
 
+		/**
+		 * States in the world represented by a 2d Grid.
+		 */
 		function GridNavState(col, row, grid) {
 			this.col = col;
 			this.row = row;
@@ -143,6 +152,11 @@
 			}
 		};
 
+		/**
+		 * Perform heuristic search.
+		 * Input: The initial state, the goal state, a structure to represent the fringe of knowledge and a heuristic to use to compare states.
+		 * Output: The last node in the search path of an optimal solution.
+		 */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
 			var maxExpansions = 350,
 			    nodesExpanded = 0,
@@ -178,11 +192,17 @@
 			return null;
 		}
 
+		/**
+		 * Euclidean distance heuristic for A*
+		 * Input: Two states, the current state and the goal state
+		 * Output: The straight line disance between the two points the states represent.
+		 */
 		function straightLineDist(currState, goalState){
 			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
 		}
 
 		/**
+	     * Convert from a node chain to an actual path.
 		 * Input: A node that is the final node in a search path.
 		 * Output: An array of vectors representing the path in grid space.
 		 */

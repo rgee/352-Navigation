@@ -61,15 +61,15 @@
         WorldGrid.prototype = {
             /* Add an object at position pos. */
             addObject: function(pos) {
-                var row = Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)));
-                var col = Math.floor(((this.nCols -1) * (pos.e(1) / this.xMax)));
+                var row = Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax))),
+                    col = Math.floor(((this.nCols -1) * (pos.e(1) / this.xMax)));
                 this.data[row][col] = 1;
             },
             
             /* Remove an object at position pos. */
             removeObject: function(pos) {
-                var row = Math.floor((this.nRows * (pos.e(2) / this.yMax)));
-                var col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
+                var row = Math.floor((this.nRows * (pos.e(2) / this.yMax))),
+                    col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
                 this.data[row][col] = 0;
             },
             
@@ -111,10 +111,10 @@
 
 		Node.prototype = {
 			expand : function() {
-				var successors = [];
-				var results = this.state.applyOperators();
-				var len = results.length;
-				var i;
+				var successors = [],
+				    results = this.state.applyOperators(),
+				    len = results.length,
+				    i;
 				for(i = 0; i < len; i++) {
 					successors.push(new Node(results[i], this));
 				}
@@ -144,13 +144,14 @@
 		};
 
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 350;
-			var nodesExpanded = 0;
-			var start = new Node(initialState);
+			var maxExpansions = 350,
+			    nodesExpanded = 0,
+			    start = new Node(initialState),
+				closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);}),
+			    current,
+			    new_nodes;
 			fringe.push(start);
-			var closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);});
-			var current;
-			var new_nodes;
+
 			while(!fringe.isEmpty()){
 				current = fringe.pop();
 				if(current.state.equals(goalState)){

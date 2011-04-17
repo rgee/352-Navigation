@@ -87,6 +87,12 @@
             		return this.isInWorld(elem[0],elem[1]); 
             	});
             },
+            // Gets the adjacent cells that are open.
+            adjacentOpenCells: function(row,col){
+            	return this.adjacentCells(row,col).filter(function(elem){
+            		return this.data[row][col] === 0;
+            	});
+            },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
                                        Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
@@ -126,7 +132,7 @@
 			   cell and not obstructed. */
 			applyOperators: function(){
 				// Generate the possible moves and create states from them.
-				var results = this.grid.adjacentCells(this.row, this.col).map(function(elem){
+				var results = this.grid.adjacentOpenCells(this.row, this.col).map(function(elem){
 					return new GridNavState(elem[0],elem[1],this.grid);
 				});
 

@@ -9,6 +9,10 @@
 		this.heading = Math.PI /2;
 		this.world = worldGrid;
 
+		// Default to A* navigation unless the dynamical flag is true
+		dynamical = dynamical || false;
+		this.strategy = (dynamical ? "dynamical" : "") || "A*"
+
 	}
 	Agent.prototype = {
 		update: function() {

@@ -36,6 +36,8 @@
 		Strategy.Dynamical = Dynamical;
 	})(Strategy);
 
+
+
 	(function(strategyObj){
 		/* A node in the search tree. Stores heuristic data as well as parent info. */
 		function Node(state, parent) {

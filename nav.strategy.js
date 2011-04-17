@@ -137,6 +137,7 @@
 				});
 
 				return results;
+			}
 		};
 
 		/* Direct translation of Aaron's version. Currently untested. (3/15/11) */

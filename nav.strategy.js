@@ -39,93 +39,6 @@
 
 
 	(function(strategyObj){
-		/* A node in the search tree. Stores heuristic data as well as parent info. */
-		function Node(state, parent) {
-			this.state = state;
-			this.parent = parent;
-			this.h = 0;
-			this.g = 0;
-		}
-
-		Node.prototype = {
-			expand : function() {
-				var successors = new Array();
-				var results = this.state.applyOperators();
-				var len = results.length;
-				var i;
-				for(i = 0; i < len; i++) {
-					successors.push(new Node(results[i], this));
-				}
-				return successors;
-			}
-		};
-
-		function GridNavState(row, col, grid) {
-			this.row = row;
-			this.col = col;
-			this.grid = grid;
-		}
-
-		GridNavState.prototype = {
-			/* Returns an array of states if they represent cells that are are adjacent to the current
-			   cell and not obstructed. */
-			applyOperators: function(){
-				var results = new Array();
-				results.push([this.col-1, this.row], [this.col +1, this.row], [this.col, this.row -1], [this.col, this.row +1]);
-				
-				var gridSpaceVec;
-				var currentRow, currentCol;
-				for(var i = 0; i < results.length; ++i){
-					gridSpaceVec = this.grid.toGridSpace(Vector.create(results[i]));
-					currentRow = (results[i])[1];
-					currentCol = (results[i])[0];
-
-					/* Filter out invalid moves and construct states from valid ones. */
-					if(!this.grid.isInWorld(currentRow, currentCol) || 
-					    this.grid.data[gridSpaceVec.e(1)][gridSpaceVec.e(0)] === 1){
-						results.splice(i,1);
-					} else {
-						results[i] = new GridNavState(currentRow, currentCol, this.grid);
-					}
-				}
-				return results;
-			}
-		};
-
-		/* Direct translation of Aaron's version. Currently untested. (3/15/11) */
-		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 3500;
-			var nodesExpanded = 0;
-			var start = new Node(initialState);
-			fringe.push(start);
-			var closedStates = new HashSet(function(u){return u;}, function(u,v){return u === v;});
-			var current;
-			var new_nodes;
-			while(!fringe.isEmpty()){
-				current = fringe.pop();
-				if(current.state === goalState){
-					console.log("Found Solution");
-					return current;
-				}
-				else if(!closedStates.contains(current.state)){
-					closedStates.add(current.state);
-					if(nodesExpanded < maxExpansions){
-						new_nodes = current.expand();
-						nodesExpanded += (new_nodes.length ? 1 : 0);
-						for(var i = 0; i < new_nodes.length; i++){
-							//console.log(new_nodes[i]);
-							new_nodes[i].g = current.g + 1;
-							new_nodes[i].h = heuristic(new_nodes[i].state, goalState);
-							
-							fringe.push(new_nodes[i]);
-						}
-					}
-				}
-			}
-			console.log("Solution not found.");
-			return null;
-		}
-
         /* Helper function for creating a 2-D Array (Grid) */
         function Grid(rows, cols){
             for(var x = 0; x < rows; ++x){
@@ -169,13 +82,91 @@
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
             adjacentCells: function(row, col) {
-
+            	var results = [[row+1,col],[row-1,col],[row,col+1],[row,col-1]];
+            	return results.filter(function(elem){
+            		return this.isInWorld(elem[0],elem[1]); 
+            	});
             },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
                                        Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
             }
         };
+
+
+		/* A node in the search tree. Stores heuristic data as well as parent info. */
+		function Node(state, parent) {
+			this.state = state;
+			this.parent = parent;
+			this.h = 0;
+			this.g = 0;
+		}
+
+		Node.prototype = {
+			expand : function() {
+				var successors = new Array();
+				var results = this.state.applyOperators();
+				var len = results.length;
+				var i;
+				for(i = 0; i < len; i++) {
+					successors.push(new Node(results[i], this));
+				}
+				return successors;
+			}
+		};
+
+		function GridNavState(row, col, grid) {
+			this.row = row;
+			this.col = col;
+			this.grid = grid;
+		}
+
+		GridNavState.prototype = {
+			/* Returns an array of states if they represent cells that are are adjacent to the current
+			   cell and not obstructed. */
+			applyOperators: function(){
+				// Generate the possible moves and create states from them.
+				var results = this.grid.adjacentCells(this.row, this.col).map(function(elem){
+					return new GridNavState(elem[0],elem[1],this.grid);
+				});
+
+				return results;
+		};
+
+		/* Direct translation of Aaron's version. Currently untested. (3/15/11) */
+		function heuristicSearch(initialState, goalState, fringe, heuristic){
+			var maxExpansions = 3500;
+			var nodesExpanded = 0;
+			var start = new Node(initialState);
+			fringe.push(start);
+			var closedStates = new HashSet(function(u){return u;}, function(u,v){return u === v;});
+			var current;
+			var new_nodes;
+			while(!fringe.isEmpty()){
+				current = fringe.pop();
+				if(current.state === goalState){
+					console.log("Found Solution");
+					return current;
+				}
+				else if(!closedStates.contains(current.state)){
+					closedStates.add(current.state);
+					if(nodesExpanded < maxExpansions){
+						new_nodes = current.expand();
+						nodesExpanded += (new_nodes.length ? 1 : 0);
+						for(var i = 0; i < new_nodes.length; i++){
+							//console.log(new_nodes[i]);
+							new_nodes[i].g = current.g + 1;
+							new_nodes[i].h = heuristic(new_nodes[i].state, goalState);
+							
+							fringe.push(new_nodes[i]);
+						}
+					}
+				}
+			}
+			console.log("Solution not found.");
+			return null;
+		}
+
 
 
 		/* A* navigation strategy object */

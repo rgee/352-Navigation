@@ -1,13 +1,12 @@
 (function(){
 	/* An agent in the world. */
-	function Agent(position, velocity, width, height, worldGrid, dynamical) {
+	function Agent(position, velocity, width, height, dynamical) {
 		this.position = position;
 		this.velocity = velocity;
-		this.target = position;
+		this.target = null;
 		this.speed = 20;
 		this.size = [width, height];
 		this.heading = Math.PI /2;
-		this.world = worldGrid;
 
 		// Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;

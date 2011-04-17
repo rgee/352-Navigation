@@ -3,11 +3,8 @@ function draw(proc){
 		this.background(20);
 		this.fill = 200;
 		this.stroke = 0;
-		agent.update();
 
-		var agentX = agent.position.e(1),
-			agentY = agent.position.e(2);
-		this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
+		//this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
 		this.drawObstacles(worldGrid);
 	};
 	
@@ -105,6 +102,14 @@ def getPhiDot(agent):
 
 
 $(document).ready(function(){
+    var agents = [new Nav.Agent($V([200,200]), $V([199,199]), 10, 10)];
+    var obstacles = [];
+    agents[0].target = $V([50,50]);
+
+    var nav = new Nav(agents, obstacles);
+    nav.update();
+
+
 /*
 	worldGrid = new Nav.WorldGrid(10, 800, 600);
 	worldGrid.addObject(Vector.create([0,0]));

@@ -55,7 +55,7 @@
             this.yMax = yMax;
             this.nRows = yMax / cellSize;
             this.nCols = xMax / cellSize;
-            this.data = new Grid(this.nRows, this.nCols);
+            this.data = new Grid(this.nCols,this.nRows);
         }
 
         WorldGrid.prototype = {
@@ -75,23 +75,24 @@
             
             /* Takes a row and a column and returns true if the cell at that position
                is on the world grid and false otherwise. */
-            isInWorld: function(row, col) {
-                return !(row < 0 || row > this.yMax) || (col < 0 || col > this.xMax);
+            isInWorld: function(col, row) {
+            	return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
             
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
-            adjacentCells: function(row, col) {
-            	var results = [[row+1,col],[row-1,col],[row,col+1],[row,col-1]];
-            	return results.filter(function(elem){
+            adjacentCells: function(col, row) {
+            	var results = [[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
+            	var final =  results.filter(function(elem){
             		return this.isInWorld(elem[0],elem[1]); 
-            	});
+            	}, this);
+            	return final;
             },
             // Gets the adjacent cells that are open.
-            adjacentOpenCells: function(row,col){
-            	return this.adjacentCells(row,col).filter(function(elem){
-            		return this.data[row][col] === 0;
-            	});
+            adjacentOpenCells: function(col,row){
+            	return this.adjacentCells(col,row).filter(function(elem){
+            		return this.data[elem[0]][elem[1]] === 0;
+            	}, this);
             },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
@@ -110,7 +111,7 @@
 
 		Node.prototype = {
 			expand : function() {
-				var successors = new Array();
+				var successors = [];
 				var results = this.state.applyOperators();
 				var len = results.length;
 				var i;
@@ -121,9 +122,9 @@
 			}
 		};
 
-		function GridNavState(row, col, grid) {
-			this.row = row;
+		function GridNavState(col, row, grid) {
 			this.col = col;
+			this.row = row;
 			this.grid = grid;
 		}
 
@@ -132,26 +133,27 @@
 			   cell and not obstructed. */
 			applyOperators: function(){
 				// Generate the possible moves and create states from them.
-				var results = this.grid.adjacentOpenCells(this.row, this.col).map(function(elem){
+				var results = this.grid.adjacentOpenCells(this.col, this.row).map(function(elem){
 					return new GridNavState(elem[0],elem[1],this.grid);
-				});
-
+				}, this);
 				return results;
+			},
+			equals: function(otherState){
+				return (this.col === otherState.col) && (this.row === otherState.row);
 			}
 		};
 
-		/* Direct translation of Aaron's version. Currently untested. (3/15/11) */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 3500;
+			var maxExpansions = 350;
 			var nodesExpanded = 0;
 			var start = new Node(initialState);
 			fringe.push(start);
-			var closedStates = new HashSet(function(u){return u;}, function(u,v){return u === v;});
+			var closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);});
 			var current;
 			var new_nodes;
 			while(!fringe.isEmpty()){
 				current = fringe.pop();
-				if(current.state === goalState){
+				if(current.state.equals(goalState)){
 					console.log("Found Solution");
 					return current;
 				}
@@ -161,12 +163,13 @@
 						new_nodes = current.expand();
 						nodesExpanded += (new_nodes.length ? 1 : 0);
 						for(var i = 0; i < new_nodes.length; i++){
-							//console.log(new_nodes[i]);
 							new_nodes[i].g = current.g + 1;
 							new_nodes[i].h = heuristic(new_nodes[i].state, goalState);
-							
 							fringe.push(new_nodes[i]);
 						}
+					} else {
+						console.log("too many nodes");
+						return null;
 					}
 				}
 			}
@@ -174,7 +177,9 @@
 			return null;
 		}
 
-
+		function straightLineDist(currState, goalState){
+			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
+		}
 
 		/* A* navigation strategy object */
 		function AStar(world){
@@ -182,9 +187,8 @@
             
             // Create the world grid here
             this.grid = new WorldGrid(10,800,600);
- 
             for(var i = 0; i < this.world.agents.length; i++){
-                this.world.addObject(this.world.agents[i].position);
+                this.grid.addObject(this.world.agents[i].position);
             }
 		}
 		AStar.prototype = {
@@ -193,7 +197,15 @@
 				
 			},
 			execute: function(agent){
+				var gridSpacePos = this.grid.toGridSpace(agent.position),
+				    gridSpaceTar = this.grid.toGridSpace(agent.target),
+				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+				    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
+				    heuristic = straightLineDist,
+				    result = heuristicSearch(initial, goal, fringe, heuristic);
 
+				console.log(result);
 			}
 		};
 		Strategy.AStar = AStar;

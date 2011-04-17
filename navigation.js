@@ -102,9 +102,9 @@ def getPhiDot(agent):
 
 
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([200,200]), $V([199,199]), 10, 10)];
+    var agents = [new Nav.Agent($V([500,600]), $V([199,199]), 10, 10)];
     var obstacles = [];
-    agents[0].target = $V([50,50]);
+    agents[0].target = $V([10,10]);
 
     var nav = new Nav(agents, obstacles);
     nav.update();

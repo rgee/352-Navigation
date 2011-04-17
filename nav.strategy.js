@@ -181,6 +181,14 @@
 			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
 		}
 
+		function toPath(node){
+			var results = [$V([node.state.col, node.state.row])];
+			while(node = node.parent){
+				results.push($V([node.state.col, node.state.row]));
+			}
+			return results;
+		}
+
 		/* A* navigation strategy object */
 		function AStar(world){
             this.world = world;
@@ -205,7 +213,7 @@
 				    heuristic = straightLineDist,
 				    result = heuristicSearch(initial, goal, fringe, heuristic);
 
-				console.log(result);
+				return toPath(result);
 			}
 		};
 		Strategy.AStar = AStar;

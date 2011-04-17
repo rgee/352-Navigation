@@ -23,6 +23,23 @@ BinHeap.prototype = {
 		}
 		return result;
 	},
+	remove: function(node){
+		var len = this.data.length;
+		for(var i = 0; i < len; i++){
+			if(this.data[i] === node){
+				var end = this.data.pop();
+				if(i != len - 1){
+					this.data[i] = end;
+					if(this.scorer(end) < this.scorer(node)){
+						this.bubbleUp(i);
+					} else {
+						this.bubbleDown(i);
+					}
+				}
+				return;
+			}
+		}
+	},
 	
 	bubbleUp: function(idx) {
 		var elem = this.data[idx];
@@ -31,10 +48,10 @@ BinHeap.prototype = {
 		
 		while(idx > 0) {
 
-			parentIndex = Math.floor((idx - 1) / 2);
+			parentIndex = Math.floor((idx + 1) / 2) - 1;
 			parent = this.data[parentIndex];
 
-			if(this.scorer(parent) < this.scorer(elem)) {
+			if(this.scorer(elem) < this.scorer(parent)) {
 				this.data[parentIndex] = elem;
 				this.data[idx] = parent;
 				idx = parentIndex;

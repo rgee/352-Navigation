@@ -341,7 +341,7 @@
 				    heuristic = straightLineDist,
 				    result = heuristicSearch(initial, goal, fringe, heuristic);
 
-				return toPath(result);
+				agent.path = toPath(result);
 			}
 		};
 		Strategy.AStar = AStar;

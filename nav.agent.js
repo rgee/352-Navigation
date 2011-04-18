@@ -11,7 +11,7 @@
 		// Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;
 		this.strategy = (dynamical ? "dynamical" : "") || "A*"
-
+		this.path = null;
 	}
 	Agent.prototype = {
 		update: function() {

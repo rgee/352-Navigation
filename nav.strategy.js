@@ -9,6 +9,17 @@
 	/* Create closures for each strategy to encapsulate things like local
 	   classes that the strategies don't need to share */
 	(function(strategyObj){
+        /* Extend the math object to add hyperbolic trigonometric functions */
+        Math.sinh = function(x){
+            return (Math.exp(x) - Math.exp(-x))/2;  
+        };
+        Math.cosh = function(x){
+            return (Math.exp(x) + Math.exp(-x))/2;    
+        };
+        Math.tanh = function(x){
+            return Math.sinh(x) / Math.cosh(x);
+        };
+
 		// Parameters. Naming should be sorted out
         var c1 = 2.0;
         var c2 = 2.0;

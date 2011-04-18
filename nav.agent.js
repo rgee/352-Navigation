@@ -4,26 +4,48 @@
 		this.position = position;
 		this.velocity = velocity;
 		this.target = null;
+		this.interTarget = null;
 		this.speed = 20;
 		this.size = [width, height];
 		this.heading = Math.PI /2;
-
+		this.speed = 1;
 		// Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;
 		this.strategy = (dynamical ? "dynamical" : "") || "A*"
-
+		this.path = null;
 	}
 	Agent.prototype = {
-		update: function() {
-			//this.strategy.execute(Vector.create([0,0]));
+		act: function() {
+			switch(this.strategy){
+				case "A*":
+					if(this.path !== null){
+						if(this.interTarget === null){
+							this.interTarget = this.path.shift();
+						}
+						if(this.position.distanceFrom(this.interTarget) <= 0.5){
+							if(this.path.length === 0){
+								this.path = this.interTarget = this.target = null;
+							} else {
+								this.interTarget = this.path.shift();
+							}
+						} else {
 
-			var dist = this.target.distanceFrom(this.position);
-			
-			/* Fail out for tiny movement requests so as to avoid weird numerical
-			   instability issues. */
-			if(dist <= 0.001) return;
-			this.position = this.position.add(this.velocity.multiply(dist* (1 / this.speed)));
-			
+							// Heading = The unitized vector representing (position - intermediate target)
+							this.heading = this.interTarget.subtract(this.position).toUnitVector();
+
+							// Position = position + (speed * direction)
+							this.position = this.position.add(this.heading.multiply(this.speed));
+
+						}
+					}
+
+
+					break;
+				case "dynamical":
+					break;
+				default:
+					break;
+			}
 		}
 	};
 

@@ -32,25 +32,31 @@
             },
             
             alphaObs: function(phi, d0) {
+                /* This is neither semantically nor syntactically correct. Going to check the slides.
                 var Di = 0;
-                for (int i = 0; i < obstacles.size(); i += 1) {
+                for (int i = 0; i < obstacles.size(); i++) {
                     Di += Di(dm, d0);
                 }
 
                 return Math.tan(Di);
+                */
             },
 
             targetDetector: function(phi, psiTar, target) {
                 var dFtar_dPhi = a * Math.cos(phi - psiTar);
                 return -1 * Math.sin(dFtar_dPhi) * Math.pow(Math.E, -c1 * 
-                    Math.abs(calculateAttraction(target);
+                    Math.abs(calculateAttraction(target)));
             },
 
             obsDetector: function(phi, d0) {
+                /* You only have to prepend something with var once. Doing it twice
+                   overwrites it with a new variable of the same name. Also,
+                   var something += something else doesn't make sense as something
+                   has no value yet.
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
-                for (int i = 0; i < obstacles.size(); i += 1) {
+                for (var i = 0; i < obstacles.size(); i++) {
                     var Di = D(dm, d0);
                     var Wi = W(phi, psi, dPsi);
                     var Ri = R(phi, psi, dPsi);
@@ -63,6 +69,7 @@
                     var w += Wi;
                 return Math.sin(dFobs_dPhi) * Math.pow(Math.E, -c1 * Math.abs(fObs)) * w;
                 }
+                */
             },
 
             getWeights: function(phi, psiTar, w1, w2, d0,aTar, gTarObs) {
@@ -70,7 +77,8 @@
                 var a2 = alphaObs(phi, d0, obstacles);
                 var g12 = gammaTarObs(gTarObs);
                 var g21 = gammaObsTar(phi, d0, psiTar);
-                for (int i = 0; i < 100; i += 1) {
+                
+                for (var i = 0; i < 100; i++) {
                     var w1dot = (a1 * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
                     var w2dot = (a2 * w2 * (1 - w2 * w2) - g12 * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
                     w1 += w1dot * timestep;
@@ -86,6 +94,7 @@
             },
 
             getPhiDot: function(agent) {
+            /* Please re-write this in JS.
                 phi = agent.heading;
                 psiTar = computeAngle(agent.position.x, agent.position.y, target.position.x, target.position.y);
                 (wtar, wobs) = getWeights(phi, psiTar, agent.weights, d0, aTar, gTarObs);
@@ -95,16 +104,18 @@
                     fObs += fObsl(phi, obstacles[i], d0);
                 }
                 return (Math.abs(wtar) * ftar) + (Math.abs(wobs) * fObs) + 0.01*(Math.random()-0.5);
-            
-
-
+            */
+            },
+        
             perceiveObstacle: function(obs) {
+            /* distanceFrom takes a vector and the subtraction operator doesn't exist for objects.
                 var dist = agent.position.distanceFrom(obs.position - 
-                    obs.size - agent.size;
+                    obs.size - agent.size);
                 var psi = agent.position.angleFrom(obs.position);
                 return subtendedAngle(agent.position, agent.size, 
                     obs.position, obs.size);
-            }
+             */
+            },
 			sense: function(agent) {
                 
             },

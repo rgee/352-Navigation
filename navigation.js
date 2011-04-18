@@ -1,71 +1,3 @@
-function draw(proc){
-	proc.draw = function(){
-		this.background(20);
-		this.fill = 200;
-		this.stroke = 0;
-
-		//this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
-		this.drawObstacles(worldGrid);
-	};
-	
-	proc.mousePressed = function() {
-		var target = $V([this.mouseX, this.mouseY]);
-		agent.target = target;
-		agent.velocity = agent.target.subtract(agent.position).toUnitVector();
-	};
-	
-	proc.keyPressed = function(){
-		
-	};
-
-    proc.drawAgent = function(){
-        
-    };
-
-    /**
-     * Visualize a path in a grid.
-     *
-     * Input: A path (list of vectors), a grid (you know what this is...)
-     */	
-    proc.drawPath = function(path, grid) {
-       var node = 0,
-           cellWidth = this.width / grid.nCols,
-           cellHeight = this.height / grid.nRows,
-           numNodes = path.length,
-           x, y,
-           nextX, nextY;
-
-        for(node; node < numNodes; node++){
-            x = path[node].e(1);
-            y = path[node].e(2);    
-
-            this.ellipse(x * cellWidth, y * cellHeight, 10, 10);
-            
-            if(node + 1 < numNodes) {
-                nextX = path[node+1].e(1);
-                nextY = path[node+1].e(2);
-                this.line(x * cellWidth, y * cellHeight, nextX * cellWidth, nextY * cellHeight);
-            }
-        }
-    };
-
-	proc.drawObstacles = function(grid) {
-		var cellWidth = this.width / grid.nCols;
-		var cellHeight = this.height / grid.nRows;
-		this.fill = 125;
-
-		for(var y = 0; y < grid.nRows; ++y){
-			for(var x = 0; x < grid.nCols; ++x) {
-
-				if(grid.data[y][x]){
-					this.rect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
-				}
-			}
-		}
-	}
-}
-
-
 /*
 Code from slides
 
@@ -111,14 +43,13 @@ $(document).ready(function(){
     agents[0].target = $V([400,300]);
 
     var nav = new Nav(agents, obstacles);
-    nav.update();
-
+    
     var draw = function (proc){
         proc.draw = function(){
             this.background(20);
             this.fill = 200;
             this.stroke = 0;
-
+            nav.update();
             //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
@@ -138,6 +69,8 @@ $(document).ready(function(){
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
+
+            this.ellipse(agent.position.e(1), agent.position.e(2), 10, 10);
         };
 
         /**
@@ -147,24 +80,21 @@ $(document).ready(function(){
          */ 
         proc.drawPath = function(path, grid) {
            var node = 0,
-               cellWidth = this.width / grid.nCols,
-               cellHeight = this.height / grid.nRows,
                numNodes = path.length,
                width = 8,
                height = 8,
                x, y,
                nextX, nextY;
-            
             for(node; node < numNodes; node++){
                 x = path[node].e(1);
                 y = path[node].e(2);    
 
-                this.ellipse(x * cellWidth, y * cellHeight, width, height);
+                this.ellipse(x, y, width, height);
                 
                 if(node + 1 < numNodes) {
                     nextX = path[node+1].e(1);
                     nextY = path[node+1].e(2);
-                    this.line(x * cellWidth, y * cellHeight, nextX * cellWidth, nextY * cellHeight);
+                    this.line(x, y, nextX, nextY);
                 }
             }
         };

@@ -17,6 +17,8 @@
                 } else {
                     // Do DS
                 }
+
+                agents[i].act();
             }
         }   
     };

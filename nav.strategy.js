@@ -201,6 +201,14 @@
             		return this.data[elem[0]][elem[1]] === 0;
             	}, this);
             },
+            /**
+             * Converts a vector from grid space to world space. By the nature of this transformation, some information is lost so we
+             * translate to the center of a grid square in world space.
+             */
+            toWorldSpace: function(pos){
+                var cellSize = (this.xMax / this.nCols);
+                return Vector.create( [(pos.e(1) * cellSize) + cellSize/2, (pos.e(2) * cellSize) + cellSize/2] );  
+            },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
                                        Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
@@ -304,19 +312,6 @@
 			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
 		}
 
-		/**
-	     * Convert from a node chain to an actual path.
-		 * Input: A node that is the final node in a search path.
-		 * Output: An array of vectors representing the path in grid space.
-		 */
-		function toPath(node){
-			var results = [$V([node.state.col, node.state.row])];
-			while(node = node.parent){
-				results.push($V([node.state.col, node.state.row]));
-			}
-			return results.reverse();
-		}
-
 		/* A* navigation strategy object */
 		function AStar(world){
             this.world = world;
@@ -328,20 +323,36 @@
             }
 		}
 		AStar.prototype = {
+            /**
+             * Convert from a node chain to an actual path.
+             * Input: A node that is the final node in a search path.
+             * Output: An array of vectors representing the path in grid space.
+             */
+            toPath: function(node){
+                var results = [$V([node.state.col, node.state.row])];
+                while(node = node.parent){
+                    results.push($V([node.state.col, node.state.row]));
+                }
+                return results.reverse().map(function(elem){
+                    return this.grid.toWorldSpace(elem);
+                }, this);
+            },
 			/* Generate the navigation path for the agent to follow */
 			plan: function(){
 				
 			},
 			execute: function(agent){
-				var gridSpacePos = this.grid.toGridSpace(agent.position),
-				    gridSpaceTar = this.grid.toGridSpace(agent.target),
-				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
-				    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
-				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
-				    heuristic = straightLineDist,
-				    result = heuristicSearch(initial, goal, fringe, heuristic);
+                if(agent.path === null && agent.target !== null){
+    				var gridSpacePos = this.grid.toGridSpace(agent.position),
+    				    gridSpaceTar = this.grid.toGridSpace(agent.target),
+    				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+    				    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+    				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
+    				    heuristic = straightLineDist,
+    				    result = heuristicSearch(initial, goal, fringe, heuristic);
 
-				agent.path = toPath(result);
+    				agent.path = this.toPath(result);
+                }
 			}
 		};
 		Strategy.AStar = AStar;

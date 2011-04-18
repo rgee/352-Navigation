@@ -150,8 +150,8 @@ $(document).ready(function(){
                cellWidth = this.width / grid.nCols,
                cellHeight = this.height / grid.nRows,
                numNodes = path.length,
-               width = 10,
-               height = 10,
+               width = 8,
+               height = 8,
                x, y,
                nextX, nextY;
             

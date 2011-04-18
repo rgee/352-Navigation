@@ -20,7 +20,8 @@
 
                 agents[i].act();
             }
-        }   
+        }
+           
     };
 
 	// Expose our module to the global scope

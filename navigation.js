@@ -52,14 +52,32 @@ $(document).ready(function(){
             //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
-            nav.world.obstacles.map(this.drawObstacle, this);
+            //nav.world.obstacles.map(this.drawObstacle, this);
+            for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
+                for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
+                    if(nav.aStar.grid.data[x][y]){
+                        this.rect(x * (10),
+                                  y * (10),
+                                  10, 10);
+                    }
+                }
+            }
         };
         
         proc.mousePressed = function() {
             var target = $V([this.mouseX, this.mouseY]);
-            nav.world.agents.map(function(elem){
-                elem.target = target; 
-            });
+            switch(this.mouseButton){
+                case 37:
+                    nav.world.agents.map(function(elem){
+                        elem.target = target; 
+                    });
+                    break;
+                case 39:
+                    nav.world.obstacles.push(target);
+                    break;
+                default:
+                    break;
+            }
         };
         
         proc.keyPressed = function(){

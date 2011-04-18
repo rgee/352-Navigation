@@ -166,11 +166,13 @@
         WorldGrid.prototype = {
             /* Add an object at position pos. */
             addObject: function(pos) {
-                var row = Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax))),
-                    col = Math.floor(((this.nCols -1) * (pos.e(1) / this.xMax)));
-                this.data[row][col] = 1;
+                var gridSpace = this.toGridSpace(pos);
+
+                this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
             },
-            
+            clear: function(){
+                this.data = new Grid(this.nCols, this.nRows);    
+            },
             /* Remove an object at position pos. */
             removeObject: function(pos) {
                 var row = Math.floor((this.nRows * (pos.e(2) / this.yMax))),
@@ -269,7 +271,7 @@
 		 * Output: The last node in the search path of an optimal solution.
 		 */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 350,
+			var maxExpansions = 35000,
 			    nodesExpanded = 0,
 			    start = new Node(initialState),
 				closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);}),
@@ -318,9 +320,7 @@
             
             // Create the world grid here
             this.grid = new WorldGrid(10,800,600);
-            for(var i = 0; i < this.world.agents.length; i++){
-                this.grid.addObject(this.world.agents[i].position);
-            }
+            this.updateRepresentation();
 		}
 		AStar.prototype = {
             /**
@@ -341,8 +341,18 @@
 			plan: function(){
 				
 			},
+            updateRepresentation: function(){
+                this.grid.clear();
+                this.world.agents.map(function(elem){
+                    this.grid.addObject(elem.position);
+                }, this);
+                this.world.obstacles.map(function(elem){
+                    this.grid.addObject(elem);
+                },this);
+            },
 			execute: function(agent){
                 if(agent.path === null && agent.target !== null){
+                   
     				var gridSpacePos = this.grid.toGridSpace(agent.position),
     				    gridSpaceTar = this.grid.toGridSpace(agent.target),
     				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
@@ -350,9 +360,12 @@
     				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
     				    heuristic = straightLineDist,
     				    result = heuristicSearch(initial, goal, fringe, heuristic);
+                    if(result !== null){
+    				    agent.path = this.toPath(result);
+                    }
 
-    				agent.path = this.toPath(result);
                 }
+                this.updateRepresentation();
 			}
 		};
 		Strategy.AStar = AStar;

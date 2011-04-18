@@ -19,6 +19,12 @@
         var gTarObs = 0.05;
         var timestep = 0.05;
         
+        function perceivedObject(dm, psi, dPsi) {
+            this.dm = dm;
+            this.psi = psi;
+            this.dPsi = dPsi;
+        }
+
         /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
 			this.world = world;
@@ -26,19 +32,37 @@
         
         
 		Dynamical.prototype = {
+            tanh: function(z) {
+                return (Math.pow(Math.E, 2 * z) - 1)/(Math.pow(Math.E, 2 * z + 1));
+            }
+            
             //fTar
             calculateAttraction: function(phi, psiTar) {
                 return -a * Math.sin(phi - psiTar);
             },
             
-            alphaObs: function(phi, d0) {
-                var Di = 0;
-                for (int i = 0; i < obstacles.size(); i += 1) {
-                    Di += Di(dm, d0);
-                }
-
-                return Math.tan(Di);
+            repelFunc: function(phi, psi, dPsi) {
+                return ((phi - psi)/dPsi) * pow(Math.E, 1 - Math.abs((phi - psi)/dPsi));
             },
+
+            windowingFunc: function(phi, psi, dPsi) {
+                return 0.5(tanh(h1 * (Math.cos(phi - psi) - Math.cos(dPsi + sigma))) + 1);
+            },
+
+            distanceFunc: function(dm, d0) {
+                return Math.pow(Math.E, -1 * (dm/d0));
+            },
+
+            alphaObs: function(phi, d0) {
+                var sum = 0;
+                for (int i = 0; i < obstacles.size(); i += 1) {
+                    sum += distanceFunc(dm, d0);
+                }
+                return tanh(sum);
+            },
+
+            fObsl(phi, obs, d0) {
+
 
             targetDetector: function(phi, psiTar, target) {
                 var dFtar_dPhi = a * Math.cos(phi - psiTar);
@@ -102,8 +126,9 @@
                 var dist = agent.position.distanceFrom(obs.position - 
                     obs.size - agent.size;
                 var psi = agent.position.angleFrom(obs.position);
-                return subtendedAngle(agent.position, agent.size, 
+                var dPsi = subtendedAngle(agent.position, agent.size, 
                     obs.position, obs.size);
+                return perceivedObject(dist, psi, dPsi);
             }
 			sense: function(agent) {
                 

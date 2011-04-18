@@ -22,8 +22,12 @@
 						if(this.interTarget === null){
 							this.interTarget = this.path.shift();
 						}
-						if(this.position.distanceFrom(this.interTarget) <= 1){
-							this.interTarget = this.path.shift();
+						if(this.position.distanceFrom(this.interTarget) <= 0.5){
+							if(this.path.length === 0){
+								this.path = this.interTarget = this.target = null;
+							} else {
+								this.interTarget = this.path.shift();
+							}
 						} else {
 
 							// Heading = The unitized vector representing (position - intermediate target)
@@ -31,12 +35,11 @@
 
 							// Position = position + (speed * direction)
 							this.position = this.position.add(this.heading.multiply(this.speed));
-							if(this.path.length === 0){
-								this.path = this.interTarget = this.target = null;
-							}
-						}
 
+						}
 					}
+
+
 					break;
 				case "dynamical":
 					break;

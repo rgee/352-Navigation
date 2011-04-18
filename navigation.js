@@ -39,8 +39,7 @@ def getPhiDot(agent):
 
 $(document).ready(function(){
     var agents = [new Nav.Agent($V([500,600]), $V([199,199]), 10, 10)];
-    var obstacles = [];
-    agents[0].target = $V([400,300]);
+    var obstacles = [$V([400, 300])];
 
     var nav = new Nav(agents, obstacles);
     
@@ -53,12 +52,14 @@ $(document).ready(function(){
             //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
+            nav.world.obstacles.map(this.drawObstacle, this);
         };
         
         proc.mousePressed = function() {
             var target = $V([this.mouseX, this.mouseY]);
-            agent.target = target;
-            agent.velocity = agent.target.subtract(agent.position).toUnitVector();
+            nav.world.agents.map(function(elem){
+                elem.target = target; 
+            });
         };
         
         proc.keyPressed = function(){
@@ -99,19 +100,9 @@ $(document).ready(function(){
             }
         };
 
-        proc.drawObstacles = function(grid) {
-            var cellWidth = this.width / grid.nCols;
-            var cellHeight = this.height / grid.nRows;
+        proc.drawObstacle = function(obstacle) {
             this.fill = 125;
-
-            for(var y = 0; y < grid.nRows; ++y){
-                for(var x = 0; x < grid.nCols; ++x) {
-
-                    if(grid.data[y][x]){
-                        this.rect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
-                    }
-                }
-            }
+            this.rect(obstacle.e(1), obstacle.e(2), 10, 10);
         }
     };
 

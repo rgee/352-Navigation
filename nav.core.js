@@ -13,7 +13,7 @@
             var agents = this.world.agents;
             for(var i = 0; i < agents.length; i++){
                 if(agents[i].strategy === "A*"){
-                    // Do A*
+                    this.aStar.execute(agents[i]);
                 } else {
                     // Do DS
                 }

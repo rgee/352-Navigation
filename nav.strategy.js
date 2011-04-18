@@ -9,23 +9,104 @@
 	/* Create closures for each strategy to encapsulate things like local
 	   classes that the strategies don't need to share */
 	(function(strategyObj){
-		/* Dynamical systems navigation strategy object */
+		// Parameters. Naming should be sorted out
+        var c1 = 2.0;
+        var c2 = 2.0;
+        var a = 1.0;
+        var sigma = 0.2;
+        var h1 = 20.0;
+        var aTar = 0.4;
+        var gTarObs = 0.05;
+        var timestep = 0.05;
+        
+        /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
 			this.world = world;
 		}
+        
+        
 		Dynamical.prototype = {
-			sense: function(agent) {
-                perceivedObs = [];
-                for (var i = 0; i < obstacles.length(); i += 1) {
-                    /* need to turn wall representations into a series of 
-                     * circles and then iterate through those potentially
-                     */
-                    var dist = 
-                        agent.position.distanceFrom(obstacles[i].position) - 
-                        obstacles[i].size - agent.size;
-                    var psi = agent.position.angleFrom(obstacles[i].position);
-                    var dPsi
+            //fTar
+            calculateAttraction: function(phi, psiTar) {
+                return -a * Math.sin(phi - psiTar);
+            },
+            
+            alphaObs: function(phi, d0) {
+                var Di = 0;
+                for (int i = 0; i < obstacles.size(); i += 1) {
+                    Di += Di(dm, d0);
                 }
+
+                return Math.tan(Di);
+            },
+
+            targetDetector: function(phi, psiTar, target) {
+                var dFtar_dPhi = a * Math.cos(phi - psiTar);
+                return -1 * Math.sin(dFtar_dPhi) * Math.pow(Math.E, -c1 * 
+                    Math.abs(calculateAttraction(target);
+            },
+
+            obsDetector: function(phi, d0) {
+                var fObs = 0;
+                var dFobs_dPhi = 0;
+                var w = 0;
+                for (int i = 0; i < obstacles.size(); i += 1) {
+                    var Di = D(dm, d0);
+                    var Wi = W(phi, psi, dPsi);
+                    var Ri = R(phi, psi, dPsi);
+                    var fObs = fObs + (Di * Wi * Ri);
+                    var tmp = (1.0/Math.cos(h1 * (Math.cos(phi - psi) - Math.cos(dPsi + sigma))));
+                    var help = (phi - psi)/dPsi;
+                    var dWi = (-0.5 * h1 * tmp * tmp * Math.sin(phi - psi));
+                    var dRi = ((dPsi - Math.abs(phi - psi)) * Math.pow(Math.E, 1-Math.abs(help)));
+                    var dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
+                    var w += Wi;
+                return Math.sin(dFobs_dPhi) * Math.pow(Math.E, -c1 * Math.abs(fObs)) * w;
+                }
+            },
+
+            getWeights: function(phi, psiTar, w1, w2, d0,aTar, gTarObs) {
+                var a1 = alphaTar(aTar);
+                var a2 = alphaObs(phi, d0, obstacles);
+                var g12 = gammaTarObs(gTarObs);
+                var g21 = gammaObsTar(phi, d0, psiTar);
+                for (int i = 0; i < 100; i += 1) {
+                    var w1dot = (a1 * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
+                    var w2dot = (a2 * w2 * (1 - w2 * w2) - g12 * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
+                    w1 += w1dot * timestep;
+                    w2 += w2dot * timestep;
+                }
+                if (!(w1 < 1 && w1 > -1)) {
+                    w1 = 0.99;
+                }
+                if (!(w2 < 1 && w2 > -1)) {
+                    w2 = 0.99;
+                }
+                return (w1, w2);
+            },
+
+            getPhiDot: function(agent) {
+                phi = agent.heading;
+                psiTar = computeAngle(agent.position.x, agent.position.y, target.position.x, target.position.y);
+                (wtar, wobs) = getWeights(phi, psiTar, agent.weights, d0, aTar, gTarObs);
+                agent.weights = (wtar, wobs);
+                fObs = 0;
+                for (int i = 0; i < obstacles.size(); i += 1) {
+                    fObs += fObsl(phi, obstacles[i], d0);
+                }
+                return (Math.abs(wtar) * ftar) + (Math.abs(wobs) * fObs) + 0.01*(Math.random()-0.5);
+            
+
+
+            perceiveObstacle: function(obs) {
+                var dist = agent.position.distanceFrom(obs.position - 
+                    obs.size - agent.size;
+                var psi = agent.position.angleFrom(obs.position);
+                return subtendedAngle(agent.position, agent.size, 
+                    obs.position, obs.size);
+            }
+			sense: function(agent) {
+                
             },
             
             execute: function(agent){

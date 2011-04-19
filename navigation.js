@@ -17,7 +17,7 @@ $(document).ready(function(){
             //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
-            //nav.world.obstacles.map(this.drawObstacle, this);
+            nav.world.obstacles.map(this.drawObstacle, this);
             if (nav.world.agents[0].strategy == "A*") {
                 for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
@@ -31,9 +31,7 @@ $(document).ready(function(){
             }
             //Dynamical systems
             else {
-                for (var i = 0; i < nav.world.obstacles.size; i += 1) {
-                    drawObstacle(nav.world.obstacles[i]);
-                }
+
             }
             proc.println(nav.world.agents[0].position.e(1) + ", " + nav.world.agents[0].position.e(2));
         };

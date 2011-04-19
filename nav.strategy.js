@@ -114,6 +114,13 @@
                 return (Math.abs(wtar) * ftar) + (Math.abs(wobs) * fObs) + 0.01*(Math.random()-0.5);
             */
             },
+
+            subtendedAngle: function(agent, obs) {
+                aPos=agent.position;
+                aRad=agent.size;
+                oPos=obs.position;
+                oRad=obs.size;
+            },
         
             perceiveObstacle: function(obs) {
             /* distanceFrom takes a vector and the subtraction operator doesn't exist for objects.

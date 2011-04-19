@@ -135,14 +135,15 @@
                     tarCircle = (agent.target.hasOwnProperty("size") ? 
                                     new Circle(agent.target.position, agent.target.size) :
                                     new Circle(agent.target, 10)),
-                    percievedObs = [],
+                    perceivedObs = [],
                     dm = psi = dPsi = 0;
-                var mapper = function(element) {
-                };
 
                 this.world.obstacles.map(function(elem){
-                    
-                });
+                    dm = pos.distanceFrom(elem.position) - elem.size - agSize;
+                    psi = this.computeAngle(pos, elem.position);
+                    dPsi = this.subtendedAngle(new Circle(pos, agSize), new Circle(elem.position, elem.size));
+                    perceivedObs.push(new Circle($V([dm, psi], dPsi))); 
+                },this);
             },
             
             execute: function(agent){

@@ -20,15 +20,6 @@
             return Math.sinh(x) / Math.cosh(x);
         };
 
-		// Parameters. Naming should be sorted out
-        var c1 = 2.0;
-        var c2 = 2.0;
-        var a = 1.0;
-        var sigma = 0.2;
-        var h1 = 20.0;
-        var aTar = 0.4;
-        var gTarObs = 0.05;
-        var timestep = 0.05;
 
         function Circle(pos, rad){
             this.center = pos;
@@ -39,64 +30,150 @@
 		function Dynamical(world){
 			this.world = world;
             this.envObs = [];
+            //Parameters
+            this.d0 = 1.0;
+            this.c1 = 2.0;
+            this.c2 = 2.0;
+            this.a = 1.0;
+            this.sigma = 0.2;
+            this.h1 = 20.0;
+            //advantage of going towards target
+            this.aTar = 0.4;
+            //advantage of going to target over obstacle
+            this.gTarObs = 0.05;
+            this.timestep = 0.05;
 		}
         
         
 		Dynamical.prototype = {
-            //fTar
+            /* Returns angle between an agent and a target*/
+            computeAngle: function(aPos, tPos) {
+                return aPos.angleFrom(tPos);
+            },
+            /* Returns delta Psi, the angle between the internal tangents of 
+             * two circles.
+             */
+            subtendedAngle: function(agent, obs) {
+                var aPos=agent.center,
+                     aRad=agent.radius,
+                     oPos=obs.center,
+                     oRad=obs.radius;
+                var bigRad=aRad+oRad;
+                var d=aPos.distanceFrom(oPos);
+                var theta=2*(Math.asin(bigRad/d));
+                return theta;
+            },
+
+            /* Calculates attraction of a target.
+             * In Juan Pablo's code, this is fTar
+             */
             calculateAttraction: function(phi, psiTar) {
-                return -a * Math.sin(phi - psiTar);
+                return -this.a * Math.sin(phi - psiTar);
             },
             
-            alphaObs: function(phi, d0) {
-                
-
-                return Math.tan(Di);
-                
-                
+            /* Distance function. Adjusts force of repeller by distance.
+             * In Juan Pablo's code, this is D
+             */
+            distanceFunc: function(dm) {
+                return Math.pow(Math.E, -1 * (dm/this.d0));
             },
 
-            targetDetector: function(phi, psiTar, target) {
-                var dFtar_dPhi = a * Math.cos(phi - psiTar);
-                return -1 * Math.sin(dFtar_dPhi) * Math.pow(Math.E, -c1 * 
-                    Math.abs(calculateAttraction(target)));
+            /* Adjusts need to avoid obstacles */
+            alphaObs: function(phi, perceivedObs) {
+                var sum = 0;
+                for (var i = 0; i < perceivedObs.size; i += 1) {
+                    sum += distanceFunc(perceivedObs.center.e(1));
+                }
+                return Math.tan(sum);
             },
 
-            obsDetector: function(phi, d0) {
-                /* You only have to prepend something with var once. Doing it twice
-                   overwrites it with a new variable of the same name. Also,
-                   var something += something else doesn't make sense as something
-                   has no value yet.
+            /* Windowing function. Sees if obstacle is in the way.
+             * In Juan Pablo's code, this is W
+             */
+            windowFunc: function(phi, psi, dPsi) {
+                return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
+                    Math.cos(dPsi + this.sigma))) + 1)
+            },
+
+            /* Repeller function. Gets the repelling power of an obstacle.
+             * In Juan Pablo's code, this is R
+             */
+            repellerFunc: function(phi, psi, dPsi) {
+                return ((phi - psi)/dPsi) * Math.pow(Math.E, 1 - 
+                    Math.abs((phi - psi)/dPsi));
+            },
+            
+            /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
+             * In Juan Pablo's code, this is sign.
+             */
+            signum: function(x) {
+                return (x > 0) ? 1 : (x == 0) ? 0 : -1;
+            },
+
+            /* The complete repeller function.
+             * In Juan Pablo's code, this is fObsI
+             */
+            fullRepellerFunc: function(phi, obs) {
+                var dist = this.distanceFunc(obs.center.e(1)),
+                    win = this.windowFunc(phi, obs.center.e(2), obs.radius),
+                    rep = this.repellerFunc(phi, obs.center.e(2), obs.radius);
+                return dist * win * rep;
+            },
+
+            /* Detects where the target is.
+             * In Juan Pablo's code, this is P_tar
+             */
+            targetDetector: function(phi, psiTar) {
+                var dFtar_dPhi = this.a * Math.cos(phi - psiTar);
+                return -1 * this.signum(dFtar_dPhi) * Math.pow(Math.E, - this.c1 * 
+                    Math.abs(this.calculateAttraction(phi, psiTar)));
+            },
+
+            /* Detects if an obstacle is in the way.
+             * In Juan Pablo's code, this is P_obs
+             */
+            obsDetector: function(phi) {
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
-                for (var i = 0; i < obstacles.size(); i++) {
-                    var Di = D(dm, d0);
-                    var Wi = W(phi, psi, dPsi);
-                    var Ri = R(phi, psi, dPsi);
-                    var fObs = fObs + (Di * Wi * Ri);
-                    var tmp = (1.0/Math.cos(h1 * (Math.cos(phi - psi) - Math.cos(dPsi + sigma))));
-                    var help = (phi - psi)/dPsi;
-                    var dWi = (-0.5 * h1 * tmp * tmp * Math.sin(phi - psi));
-                    var dRi = ((dPsi - Math.abs(phi - psi)) * Math.pow(Math.E, 1-Math.abs(help)));
-                    var dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
-                    var w += Wi;
-                return Math.sin(dFobs_dPhi) * Math.pow(Math.E, -c1 * Math.abs(fObs)) * w;
+                var Di, Wi, Ri, fObs, tmp, help, dWi, dRi, dFobs_dPhi;
+                for (var i = 0; i < this.envObs.length; i++) {
+                    fObs = fObs + this.fullRepellerFunc(phi, this.envObs[i]);
+                    tmp = (1.0/Math.cos(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
+                    help = (phi - psi)/dPsi;
+                    dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
+                    dRi = ((dPsi - Math.abs(phi - psi)) * Math.pow(Math.E, 1-Math.abs(help)));
+                    dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
+                    w += Wi;
                 }
-                */
+                return this.signum(dFobs_dPhi) * Math.pow(Math.E, -this.c1 * Math.abs(fObs)) * w;
+            },
+            /* Sees if agent is heading towards a stable point or unstable 
+             * point
+             */
+            gammaObsTar: function(phi, psiTar, obsList) {
+                var pTar = this.targetDetector(phi, psiTar),
+                    pObs = this.obsDetector(phi);
+                return Math.pow(Math.E, -1 * this.c2 * pTar * pObs - this.c2);
+            },
+            
+            /* Defines an attractor.
+             * In Juan Pablo's code, this is fTar.
+             */
+            defAttractor: function(phi, psiTar) {
+                return this.a * Math.sin(phi - psiTar);
             },
 
-            getWeights: function(phi, psiTar, w1, w2, d0,aTar, gTarObs) {
-                var a1 = alphaTar(aTar);
-                var a2 = alphaObs(phi, d0, obstacles);
-                var g12 = gammaTarObs(gTarObs);
-                var g21 = gammaObsTar(phi, d0, psiTar);
+            /* Gets the weight of a target and a repeller*/
+            getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
+                var a2 = this.alphaObs(phi, perceivedObs),
+                    g21 = this.gammaObsTar(phi, psiTar);
                 
                 for (var i = 0; i < 100; i++) {
-                    var w1dot = (a1 * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
-                    var w2dot = (a2 * w2 * (1 - w2 * w2) - g12 * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
-                    w1 += w1dot * timestep;
-                    w2 += w2dot * timestep;
+                    var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
+                    var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
+                    w1 += w1dot * this.timestep;
+                    w2 += w2dot * this.timestep;
                 }
                 if (!(w1 < 1 && w1 > -1)) {
                     w1 = 0.99;
@@ -104,32 +181,23 @@
                 if (!(w2 < 1 && w2 > -1)) {
                     w2 = 0.99;
                 }
-                return (w1, w2);
+                return [w1, w2];
             },
-
-            getPhiDot: function(agent) {
-            /* Please re-write this in JS.
-                phi = agent.heading;
-                psiTar = computeAngle(agent.position.x, agent.position.y, target.position.x, target.position.y);
-                (wtar, wobs) = getWeights(phi, psiTar, agent.weights, d0, aTar, gTarObs);
-                agent.weights = (wtar, wobs);
-                fObs = 0;
-                for (int i = 0; i < obstacles.size(); i += 1) {
-                    fObs += fObsl(phi, obstacles[i], d0);
+            
+            /* Get the heading that the agent should be moving in */
+            getPhiDot: function(agent, perceivedObs) {
+                var phi = agent.heading;
+                var psiTar = this.computeAngle(agent.position, agent.target);
+                agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
+                    agent.weights[1], perceivedObs); //of the form [wtar, wobs]
+                var fObs = 0;
+                for (var i = 0; i < perceivedObs.length; i += 1) {
+                    fObs += this.fullRepellerFunc(phi, perceivedObs[i]);
                 }
-                return (Math.abs(wtar) * ftar) + (Math.abs(wobs) * fObs) + 0.01*(Math.random()-0.5);
-            */
+                return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
+                    (Math.abs(agent.weights[1]) * fObs) + 0.01*(Math.random()-0.5);
             },
-        
-            perceiveObstacle: function(obs) {
-            /* distanceFrom takes a vector and the subtraction operator doesn't exist for objects.
-                var dist = agent.position.distanceFrom(obs.position - 
-                    obs.size - agent.size);
-                var psi = agent.position.angleFrom(obs.position);
-                return subtendedAngle(agent.position, agent.size, 
-                    obs.position, obs.size);
-             */
-            },
+            /* Perceive objects */
 			sense: function(agent) {
                 var pos = agent.position,
                     agSize = agent.size,
@@ -147,24 +215,50 @@
                 },this);
                 return perceivedObs;
             },
-            updateRepresentation: function(){
+            /* update the perception of objects*/
+            updateRepresentation: function(agent){
                 this.envObs = [];
 
                 this.world.agents.map(function(elem){
-                   this.envObs.push(new Circle(elem.position, elem.size));
+                    if(elem !== agent) {
+                        this.envObs.push(new Circle(elem.position, elem.size));
+                    }
                 }, this);
 
                 this.world.obstacles.map(function(elem){
-                    if(elem.hasOwnProperty("size") && elem.hasOwnProperty("position")){
+                    if(elem.type !== "wall") {
                         this.envObs.push(new Circle(elem.position, elem.size));
                     } else {
                         // We're looking at a wall so TODO: Convert a wall to a bunch of circles.
                     }
                 }, this);
             },
+
+            /* Execute dynamical systems and move forward one timestep
+             */
             execute: function(agent){
-				/* This function should probably only update the agent's heading angle at every call,
-				   based on the dynamical system. */
+				/* Currently updates both the position and heading because the position 
+                 * is dependent on the old heading*/
+                if (agent.target !== null) {
+                    this.updateRepresentation(agent);
+                    var perceivedObs = this.sense(agent),
+                        pd = this.getPhiDot(agent, perceivedObs),
+                        vel = agent.velocity,
+                        oldHeading = agent.heading,
+                        xd = vel.e(1) * Math.cos(agent.heading),
+                        yd = vel.e(2) * Math.sin(agent.heading);
+                    var newX = agent.position.e(1) + this.timestep * xd,
+                        newY = agent.position.e(2) + this.timestep * yd,
+                        newHeading = oldHeading + this.timestep * pd;
+                    agent.heading = newHeading;
+                    agent.position = $V([newX, newY]);
+                    if (agent.position.e(1) >= agent.target.e(1) - 10 && 
+                        agent.position.e(1) < agent.target.e(1) + 10 &&
+                        agent.position.e(2) >= agent.target.e(2) - 10 &&
+                        agent.position.e(2) < agent.target.e(2) + 10) {
+                        agent.target = null;
+                    }
+                }
 			}
 		};
 		Strategy.Dynamical = Dynamical;
@@ -378,7 +472,7 @@
                     this.grid.addObject(elem.position);
                 }, this);
                 this.world.obstacles.map(function(elem){
-                    this.grid.addObject(elem);
+                    this.grid.addObject(elem.position); //the position was added as a hack
                 },this);
             },
 			execute: function(agent){

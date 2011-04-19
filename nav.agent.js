@@ -7,7 +7,7 @@
 		this.interTarget = null;
 		this.speed = 20;
 		this.size = size;
-		this.heading = Math.PI /2;
+		this.heading = 2*Math.PI;
 		this.speed = 1;
 		this.weights = [0.99, 0.99] //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true

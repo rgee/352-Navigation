@@ -38,6 +38,7 @@
         /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
 			this.world = world;
+            this.envObs = [];
 		}
         
         
@@ -138,15 +139,29 @@
                     perceivedObs = [],
                     dm = psi = dPsi = 0;
 
-                this.world.obstacles.map(function(elem){
-                    dm = pos.distanceFrom(elem.position) - elem.size - agSize;
-                    psi = this.computeAngle(pos, elem.position);
-                    dPsi = this.subtendedAngle(new Circle(pos, agSize), new Circle(elem.position, elem.size));
+                this.envObs.map(function(elem){
+                    dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
+                    psi = this.computeAngle(pos, elem.center);
+                    dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
                     perceivedObs.push(new Circle($V([dm, psi]), dPsi)); 
                 },this);
                 return perceivedObs;
             },
-            
+            updateRepresentation: function(){
+                this.envObs = [];
+
+                this.world.agents.map(function(elem){
+                   this.envObs.push(new Circle(elem.position, elem.size));
+                }, this);
+
+                this.world.obstacles.map(function(elem){
+                    if(elem.hasOwnProperty("size") && elem.hasOwnProperty("position")){
+                        this.envObs.push(new Circle(elem.position, elem.size));
+                    } else {
+                        // We're looking at a wall so TODO: Convert a wall to a bunch of circles.
+                    }
+                }, this);
+            },
             execute: function(agent){
 				/* This function should probably only update the agent's heading angle at every call,
 				   based on the dynamical system. */

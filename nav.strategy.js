@@ -29,6 +29,11 @@
         var aTar = 0.4;
         var gTarObs = 0.05;
         var timestep = 0.05;
+
+        function Circle(pos, rad){
+            this.center = pos;
+            this.radius = rad;
+        }
         
         /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
@@ -125,7 +130,19 @@
              */
             },
 			sense: function(agent) {
-                
+                var pos = agent.position,
+                    agSize = agent.size,
+                    tarCircle = (agent.target.hasOwnProperty("size") ? 
+                                    new Circle(agent.target.position, agent.target.size) :
+                                    new Circle(agent.target, 10)),
+                    percievedObs = [],
+                    dm = psi = dPsi = 0;
+                var mapper = function(element) {
+                };
+
+                this.world.obstacles.map(function(elem){
+                    
+                });
             },
             
             execute: function(agent){

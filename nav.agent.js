@@ -1,16 +1,16 @@
 (function(){
 	/* An agent in the world. */
-	function Agent(position, velocity, radius, dynamical) {
+	function Agent(position, velocity, size, dynamical) {
 		this.position = position;
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
 		this.speed = 20;
-		this.size = radius;
-        std=c99
+		this.size = size;
 		this.heading = Math.PI /2;
 		this.speed = 1;
-		// Default to A* navigation unless the dynamical flag is true
+		this.weights = [0.99, 0.99] //for dynamical, setting here as hack
+        // Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;
 		this.strategy = (dynamical ? "dynamical" : "") || "A*"
 		this.path = null;
@@ -43,6 +43,12 @@
 
 					break;
 				case "dynamical":
+                    /* Since the new position is based on the old heading, at 
+                     * least temporarily this does nothing and the position 
+                     * and heading are updated in the execute function. 
+                     * Therefore TODO: have the position be updated here
+                     */
+                    
 					break;
 				default:
 					break;
@@ -53,3 +59,4 @@
 	// Expose Agent constructor to main module
 	Nav.Agent = Agent;
 })();
+>>>>>>> 6a7ae3cf942e20e9073b86e614bbedf7a919acc8

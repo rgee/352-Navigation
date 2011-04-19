@@ -1,49 +1,14 @@
-/*
-Code from slides
-
-act(agent):
-    pd = getPhiDot(agent)
-    vel = getV(agent)
-    oldPhi = agent.headingAngle
-    (oldX,oldY) = agent.posn
-    #perform action
-    xd = vel * cos(oldPhi)
-    yd = vel * sin(oldPhi)
-
-    newX = oldX + timestep*xd
-    newY = oldY + timestep*yd
-    newPhi = oldPhi + timestep*pd
-
-    agent.headingAngle = newPhi
-    agent.posn = (newX,newY)
-
-
-def getPhiDot(agent):
-    #get necessary quantities for calculating phiDot
-    phi = agent.headingAngle
-    (x,y)=agent.posn
-    size = agent.size
-    weights = agent.weights
-    (d0,c1,c2,a,sigma,aTar,gTarObs,h1) = agent.params
-    obsList = agent.perceivedObs #perceived obs. attributes of the form (dm,psi,dPsi)
-    (tarX,tarY,tarSize) = agent.target
-    psiTar = computeAngle(x,y,tarX,tarY)
-
-    #calculate weights dynamical system and from that get phiDot
-    (wtar,wobs) = getWeights(phi,psiTar,obsList,weights,timestep, d0,c1,c2,a,h1,sigma,aTar,gTarObs)
-    agent.weights = (wtar,wobs)
-*/
-
-
-
-
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([500,600]), $V([199,199]), 10, 10)];
-    var obstacles = [$V([400, 300])];
+    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10, true)];
+    var obstacles = [new Nav.Obstacle("goldfish", $V([400, 300]), 10)];
 
     var nav = new Nav(agents, obstacles);
     
     var draw = function (proc){
+        proc.setup = function() {
+            proc.frameRate(10);
+            proc.size(1000,1000);
+        }
         proc.draw = function(){
             this.background(20);
             this.fill = 200;
@@ -52,16 +17,23 @@ $(document).ready(function(){
             //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
-            //nav.world.obstacles.map(this.drawObstacle, this);
-            for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
-                for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
-                    if(nav.aStar.grid.data[x][y]){
-                        this.rect(x * (10),
-                                  y * (10),
-                                  10, 10);
+            nav.world.obstacles.map(this.drawObstacle, this);
+            if (nav.world.agents[0].strategy == "A*") {
+                for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
+                    for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
+                        if(nav.aStar.grid.data[x][y]){
+                            this.rect(x * (10),
+                                      y * (10),
+                                      10, 10);
+                        }
                     }
                 }
             }
+            //Dynamical systems
+            else {
+
+            }
+            proc.println(nav.world.agents[0].position.e(1) + ", " + nav.world.agents[0].position.e(2));
         };
         
         proc.mousePressed = function() {
@@ -73,7 +45,7 @@ $(document).ready(function(){
                     });
                     break;
                 case 39:
-                    nav.world.obstacles.push(target);
+                    nav.world.obstacles.push(new Nav.Obstacle("goldfish", target, 10));
                     break;
                 default:
                     break;
@@ -120,10 +92,10 @@ $(document).ready(function(){
 
         proc.drawObstacle = function(obstacle) {
             this.fill = 125;
-            this.rect(obstacle.e(1), obstacle.e(2), 10, 10);
+            this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
         }
     };
 
 	var proc = new Processing(document.getElementById('display'), draw);
-	proc.size(800,600);
+	/*proc.size(800,600);*/
 });

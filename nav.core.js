@@ -16,6 +16,7 @@
                     this.aStar.execute(agents[i]);
                 } else {
                     // Do DS
+                    this.dynamical.execute(agents[i]);
                 }
 
                 agents[i].act();

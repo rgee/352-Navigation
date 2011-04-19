@@ -80,11 +80,11 @@
 
             /* Adjusts need to avoid obstacles */
             alphaObs: function(phi, perceivedObs) {
-                var sum = 0;
-                for (var i = 0; i < perceivedObs.size; i += 1) {
-                    sum += distanceFunc(perceivedObs.center.e(1));
-                }
-                return Math.tan(sum);
+                return Math.tanh(perceivedObs.map(function(ob){
+                                    return this.distanceFunc(ob[2]);
+                                },this).reduce(function(prev, curr, index, array){
+                                    return prev + curr;
+                                }));
             },
 
             /* Windowing function. Sees if obstacle is in the way.
@@ -99,8 +99,8 @@
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
-                return ((phi - psi)/dPsi) * Math.pow(Math.E, 1 - 
-                    Math.abs((phi - psi)/dPsi));
+                return ((phi - psi)/dPsi) *
+                Math.exp(1 - Math.abs((phi - psi)/dPsi));
             },
             
             /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -132,21 +132,29 @@
             /* Detects if an obstacle is in the way.
              * In Juan Pablo's code, this is P_obs
              */
-            obsDetector: function(phi) {
+            obsDetector: function(phi, obsList) {
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
-                var Di, Wi, Ri, fObs, tmp, help, dWi, dRi, dFobs_dPhi;
-                for (var i = 0; i < this.envObs.length; i++) {
-                    fObs = fObs + this.fullRepellerFunc(phi, this.envObs[i]);
-                    tmp = (1.0/Math.cos(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
+                var Di, Wi, Ri, fObs, tmp, help, dWi, dRi, dFobs_dPhi, psi, dm, dPsi
+                
+                /* Each obstacle is an array of the form:
+                    [dm, psi, dPsi]
+                 */
+                this.obsList.map(function(ob){
+                    dm = ob[0];
+                    psi = ob[1];
+                    dPsi = ob[2];
+
+                    fObs = fObs + this.fullRepellerFunc(phi, obstacle);
+                    tmp = (1.0/Math.cosh(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
                     help = (phi - psi)/dPsi;
                     dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
-                    dRi = ((dPsi - Math.abs(phi - psi)) * Math.pow(Math.E, 1-Math.abs(help)));
+                    dRi = ((dPsi - Math.abs(phi - psi)) * Math.exp(1-Math.abs(help))) / (dPsi * dPsi);
                     dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
                     w += Wi;
-                }
-                return this.signum(dFobs_dPhi) * Math.pow(Math.E, -this.c1 * Math.abs(fObs)) * w;
+                }, this);
+                return this.signum(dFobs_dPhi) * Math.exp(-this.c1 * Math.abs(fObs)) * w;
             },
             /* Sees if agent is heading towards a stable point or unstable 
              * point
@@ -213,7 +221,7 @@
                     dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
                     psi = this.computeAngle(pos, elem.center);
                     dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
-                    perceivedObs.push(new Circle($V([dm, psi]), dPsi)); 
+                    perceivedObs.push([dm, psi, dPsi]); 
                 },this);
                 return perceivedObs;
             },

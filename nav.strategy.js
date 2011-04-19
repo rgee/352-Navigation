@@ -29,6 +29,11 @@
         var aTar = 0.4;
         var gTarObs = 0.05;
         var timestep = 0.05;
+
+        function Circle(pos, rad){
+            this.center = pos;
+            this.radius = rad;
+        }
         
         /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
@@ -114,14 +119,16 @@
                 return (Math.abs(wtar) * ftar) + (Math.abs(wobs) * fObs) + 0.01*(Math.random()-0.5);
             */
             },
-
+        
             subtendedAngle: function(agent, obs) {
                 aPos=agent.position;
                 aRad=agent.size;
                 oPos=obs.position;
                 oRad=obs.size;
+                
             },
-        
+
+
             perceiveObstacle: function(obs) {
             /* distanceFrom takes a vector and the subtraction operator doesn't exist for objects.
                 var dist = agent.position.distanceFrom(obs.position - 
@@ -132,7 +139,19 @@
              */
             },
 			sense: function(agent) {
-                
+                var pos = agent.position,
+                    agSize = agent.size,
+                    tarCircle = (agent.target.hasOwnProperty("size") ? 
+                                    new Circle(agent.target.position, agent.target.size) :
+                                    new Circle(agent.target, 10)),
+                    percievedObs = [],
+                    dm = psi = dPsi = 0;
+                var mapper = function(element) {
+                };
+
+                this.world.obstacles.map(function(elem){
+                    
+                });
             },
             
             execute: function(agent){
@@ -379,3 +398,4 @@
 	// Nav.strategy.<nav_strat>
 	Nav.Strategy = Strategy;
 })();
+>>>>>>> 080c6ea3a059381964328555a3a8d8eb37fd4f8f

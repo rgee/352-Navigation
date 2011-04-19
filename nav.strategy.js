@@ -114,9 +114,9 @@
              * In Juan Pablo's code, this is fObsI
              */
             fullRepellerFunc: function(phi, obs) {
-                var dist = this.distanceFunc(obs.center.e(1)),
-                    win = this.windowFunc(phi, obs.center.e(2), obs.radius),
-                    rep = this.repellerFunc(phi, obs.center.e(2), obs.radius);
+                var dist = this.distanceFunc(obs[0]),
+                    win = this.windowFunc(phi, obs[1], obs[2]),
+                    rep = this.repellerFunc(phi, obs[1], obs[2]);
                 return dist * win * rep;
             },
 
@@ -141,12 +141,12 @@
                 /* Each obstacle is an array of the form:
                     [dm, psi, dPsi]
                  */
-                this.obsList.map(function(ob){
+                obsList.map(function(ob){
                     dm = ob[0];
                     psi = ob[1];
                     dPsi = ob[2];
 
-                    fObs = fObs + this.fullRepellerFunc(phi, obstacle);
+                    fObs = fObs + this.fullRepellerFunc(phi, ob);
                     tmp = (1.0/Math.cosh(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
                     help = (phi - psi)/dPsi;
                     dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
@@ -161,7 +161,7 @@
              */
             gammaObsTar: function(phi, psiTar, obsList) {
                 var pTar = this.targetDetector(phi, psiTar),
-                    pObs = this.obsDetector(phi);
+                    pObs = this.obsDetector(phi, obsList);
                 return Math.pow(Math.E, -1 * this.c2 * pTar * pObs - this.c2);
             },
             
@@ -175,7 +175,7 @@
             /* Gets the weight of a target and a repeller*/
             getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
-                    g21 = this.gammaObsTar(phi, psiTar);
+                    g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
                 
                 for (var i = 0; i < 100; i++) {
                     var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));

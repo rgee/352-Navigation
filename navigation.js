@@ -47,7 +47,7 @@ $(document).ready(function(){
                     });
                     break;
                 case 39:
-                    nav.world.obstacles.push(target);
+                    nav.world.obstacles.push(new Nav.Obstacle("goldfish", target, 10));
                     break;
                 default:
                     break;

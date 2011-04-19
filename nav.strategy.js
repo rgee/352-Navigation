@@ -190,10 +190,12 @@
                 var psiTar = this.computeAngle(agent.position, agent.target);
                 agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
                     agent.weights[1], perceivedObs); //of the form [wtar, wobs]
-                var fObs = 0;
-                for (var i = 0; i < perceivedObs.length; i += 1) {
-                    fObs += this.fullRepellerFunc(phi, perceivedObs[i]);
-                }
+
+                var fObs = perceivedObs.map(function(elem){
+                    return this.fullRepellerFunc(phi, elem);
+                },this).reduce(function(prev, curr, index, array){
+                    return prev+curr;
+                });
                 return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     (Math.abs(agent.weights[1]) * fObs) + 0.01*(Math.random()-0.5);
             },

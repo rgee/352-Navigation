@@ -75,14 +75,14 @@
              * In Juan Pablo's code, this is D
              */
             distanceFunc: function(dm) {
-                return Math.pow(Math.E, -1 * (dm/this.d0));
+                return Math.exp(-1 * (dm/this.d0));
             },
 
             /* Adjusts need to avoid obstacles */
             alphaObs: function(phi, perceivedObs) {
                 return Math.tanh(perceivedObs.map(function(ob){
                                     return this.distanceFunc(ob[2]);
-                                },this).reduce(function(prev, curr, index, array){
+                                },this).reduce(function(prev, curr){
                                     return prev + curr;
                                 }));
             },
@@ -125,7 +125,7 @@
              */
             targetDetector: function(phi, psiTar) {
                 var dFtar_dPhi = this.a * Math.cos(phi - psiTar);
-                return -1 * this.signum(dFtar_dPhi) * Math.pow(Math.E, - this.c1 * 
+                return -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
                     Math.abs(this.calculateAttraction(phi, psiTar)));
             },
 
@@ -150,7 +150,7 @@
                     tmp = (1.0/Math.cosh(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
                     help = (phi - psi)/dPsi;
                     dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
-                    dRi = ((dPsi - Math.abs(phi - psi)) * Math.exp(1-Math.abs(help))) / (dPsi * dPsi);
+                    dRi = (((dPsi - Math.abs(phi - psi)) * Math.exp(1-Math.abs(help))) / (dPsi * dPsi));
                     dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
                     w += Wi;
                 }, this);
@@ -162,7 +162,7 @@
             gammaObsTar: function(phi, psiTar, obsList) {
                 var pTar = this.targetDetector(phi, psiTar),
                     pObs = this.obsDetector(phi, obsList);
-                return Math.pow(Math.E, -1 * this.c2 * pTar * pObs - this.c2);
+                return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             
             /* Defines an attractor.
@@ -201,7 +201,7 @@
 
                 var fObs = perceivedObs.map(function(elem){
                     return this.fullRepellerFunc(phi, elem);
-                },this).reduce(function(prev, curr, index, array){
+                },this).reduce(function(prev, curr){
                     return prev+curr;
                 });
                 return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
@@ -218,10 +218,12 @@
                     dm = psi = dPsi = 0;
 
                 this.envObs.map(function(elem){
-                    dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
-                    psi = this.computeAngle(pos, elem.center);
-                    dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
-                    perceivedObs.push([dm, psi, dPsi]); 
+                    if(elem !== agent){
+                        dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
+                        psi = this.computeAngle(pos, elem.center);
+                        dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
+                        perceivedObs.push([dm, psi, dPsi]); 
+                    }
                 },this);
                 return perceivedObs;
             },

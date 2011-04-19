@@ -133,6 +133,7 @@
              * In Juan Pablo's code, this is P_obs
              */
             obsDetector: function(phi, obsList) {
+                /* RABBIT HOLE BEGINS HERE. RETURNS NaN */
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
@@ -161,7 +162,7 @@
              */
             gammaObsTar: function(phi, psiTar, obsList) {
                 var pTar = this.targetDetector(phi, psiTar),
-                    pObs = this.obsDetector(phi, obsList);
+                    pObs = this.obsDetector(phi, obsList); 
                 return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             
@@ -176,7 +177,6 @@
             getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
-                
                 for (var i = 0; i < 100; i++) {
                     var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
                     var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
@@ -257,11 +257,12 @@
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,
                         oldHeading = agent.heading,
-                        xd = vel.e(1) * Math.cos(agent.heading),
-                        yd = vel.e(2) * Math.sin(agent.heading);
+                        xd = 50 *Math.cos(agent.heading),
+                        yd = 50 * Math.sin(agent.heading);
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
+
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
                     if (agent.position.e(1) >= agent.target.e(1) - 10 && 

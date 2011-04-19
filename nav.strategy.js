@@ -144,6 +144,7 @@
                     dPsi = this.subtendedAngle(new Circle(pos, agSize), new Circle(elem.position, elem.size));
                     perceivedObs.push(new Circle($V([dm, psi]), dPsi)); 
                 },this);
+                return perceivedObs;
             },
             
             execute: function(agent){

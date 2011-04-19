@@ -142,7 +142,7 @@
                     dm = pos.distanceFrom(elem.position) - elem.size - agSize;
                     psi = this.computeAngle(pos, elem.position);
                     dPsi = this.subtendedAngle(new Circle(pos, agSize), new Circle(elem.position, elem.size));
-                    perceivedObs.push(new Circle($V([dm, psi], dPsi))); 
+                    perceivedObs.push(new Circle($V([dm, psi]), dPsi)); 
                 },this);
             },
             

@@ -33,7 +33,6 @@ $(document).ready(function(){
             else {
 
             }
-            //proc.println(nav.world.agents[0].position.e(1) + ", " + nav.world.agents[0].position.e(2));
         };
         
         proc.mousePressed = function() {

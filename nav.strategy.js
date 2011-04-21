@@ -48,7 +48,7 @@
 		Dynamical.prototype = {
             /* Returns angle between an agent and a target*/
             computeAngle: function(aPos, tPos) {
-                return aPos.angleFrom(tPos);
+                return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1)) - Math.PI;
             },
             /* Returns delta Psi, the angle between the internal tangents of 
              * two circles.
@@ -68,6 +68,7 @@
              * In Juan Pablo's code, this is fTar
              */
             calculateAttraction: function(phi, psiTar) {
+                //console.log("phi\t" + phi + "\tpsiTar\t" + psiTar + "\tMath.sin(phi - psiTar)\t" + Math.sin(phi - psiTar));
                 return -this.a * Math.sin(phi - psiTar);
             },
             
@@ -80,6 +81,7 @@
 
             /* Adjusts need to avoid obstacles */
             alphaObs: function(phi, perceivedObs) {
+				if (perceivedObs.length === 0) { return 0;}
                 return Math.tanh(perceivedObs.map(function(ob){
                                     return this.distanceFunc(ob[2]);
                                 },this).reduce(function(prev, curr){
@@ -125,6 +127,8 @@
              */
             targetDetector: function(phi, psiTar) {
                 var dFtar_dPhi = this.a * Math.cos(phi - psiTar);
+                /*console.log(this.signum(dFtar_dPhi) + "\t" + -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
+                    Math.abs(this.calculateAttraction(phi, psiTar))) + "\t" + this.calculateAttraction(phi, psiTar));*/
                 return -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
                     Math.abs(this.calculateAttraction(phi, psiTar)));
             },
@@ -171,6 +175,7 @@
             gammaObsTar: function(phi, psiTar, obsList) {
                 var pTar = this.targetDetector(phi, psiTar),
                     pObs = this.obsDetector(phi, obsList);
+				//console.log("pTar\t" + pTar + "\tObs\t" + pObs + "\t" + Math.exp(-1 * this.c2 * pTar * pObs - this.c2));
                 return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             
@@ -207,11 +212,16 @@
                 agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
                     agent.weights[1], perceivedObs); //of the form [wtar, wobs]
 
-                var fObs = perceivedObs.map(function(elem){
-                    return this.fullRepellerFunc(phi, elem);
-                },this).reduce(function(prev, curr){
-                    return prev+curr;
-                });
+				if (perceivedObs.length === 0) {
+					fObs = 0;
+				}
+				else {
+					var fObs = perceivedObs.map(function(elem){
+						return this.fullRepellerFunc(phi, elem);
+					}, this).reduce(function(prev, curr){
+						return prev + curr;
+					});
+				}
                 return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     (Math.abs(agent.weights[1]) * fObs) + 0.01*(Math.random()-0.5);
             },

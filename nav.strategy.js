@@ -34,7 +34,7 @@
             this.d0 = 1.0;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 1.0;
+            this.a = 20.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target

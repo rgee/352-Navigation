@@ -96,7 +96,7 @@ $(document).ready(function(){
         proc.drawObstacle = function(obstacle) {
             this.fill = 200;
             this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
-        }
+        };
     };
 
 	var proc = new Processing(document.getElementById('display'), draw);

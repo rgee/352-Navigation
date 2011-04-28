@@ -59,8 +59,11 @@ $(document).ready(function(){
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
-
             this.ellipse(agent.position.e(1), agent.position.e(2), 10, 10);
+            //draw target
+            if(agent.target !== null) {
+                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
+            }
         };
 
         /**
@@ -90,7 +93,7 @@ $(document).ready(function(){
         };
 
         proc.drawObstacle = function(obstacle) {
-            this.fill = 125;
+            this.fill = 200;
             this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
         }
     };

@@ -1,13 +1,13 @@
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10)];
-    var obstacles = [new Nav.Obstacle("goldfish", $V([400, 300]), 10)];
+    var agents = [new Nav.Agent($V([200,150]), $V([50,50]), 10)];
+    var obstacles = [new Nav.Obstacle("goldfish", $V([100, 100]), 10)];
 
     var nav = new Nav(agents, obstacles);
     
     var draw = function (proc){
         proc.setup = function() {
-            proc.frameRate(30);
-            proc.size(1000,1000);
+            proc.frameRate(60);
+            proc.size(400,300);
         };
         proc.draw = function(){
             this.background(20);
@@ -18,13 +18,14 @@ $(document).ready(function(){
             //this.drawObstacles(worldGrid);
             nav.world.agents.map(this.drawAgent, this);
             nav.world.obstacles.map(this.drawObstacle, this);
+            var cellSize = nav.aStar.grid.cellSize;
             if (nav.world.agents[0].strategy == "A*") {
-                for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
-                    for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
+                for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
+                    for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         if(nav.aStar.grid.data[x][y]){
-                            this.rect(x * (10),
-                                      y * (10),
-                                      10, 10);
+                            //this.rect(x * (10),
+                            //          y * (10),
+                            //          10, 10);
                         }
                     }
                 }

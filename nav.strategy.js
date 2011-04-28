@@ -316,6 +316,7 @@
          */
         function WorldGrid(cellSize, xMax, yMax) {
             this.xMax = xMax;
+            this.cellSize = cellSize;
             this.yMax = yMax;
             this.nRows = yMax / cellSize;
             this.nCols = xMax / cellSize;
@@ -444,7 +445,7 @@
 		 * Output: The last node in the search path of an optimal solution.
 		 */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 35000,
+			var maxExpansions = 90000,
 			    nodesExpanded = 0,
 			    start = new Node(initialState),
 				closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);}),
@@ -492,7 +493,7 @@
             this.world = world;
             
             // Create the world grid here
-            this.grid = new WorldGrid(10,800,600);
+            this.grid = new WorldGrid(20,400,300);
             this.updateRepresentation();
 		}
 		AStar.prototype = {

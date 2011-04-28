@@ -5,10 +5,9 @@
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
-		this.speed = 50;
+		this.speed = 1;
 		this.size = size;
 		this.heading = 2*Math.PI;
-		this.speed = 1;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;
@@ -23,6 +22,7 @@
 						if(this.interTarget === null){
 							this.interTarget = this.path.shift();
 						}
+                        
 						if(this.position.distanceFrom(this.interTarget) <= 0.5){
 							if(this.path.length === 0){
 								this.path = this.interTarget = this.target = null;
@@ -34,7 +34,7 @@
 							// Heading = The unitized vector representing (position - intermediate target)
 							this.heading = this.interTarget.subtract(this.position).toUnitVector();
 
-							// Position = position + (speed * direction)
+                            // Position = position + (speed * direction)
 							this.position = this.position.add(this.heading.multiply(this.speed));
 
 						}

@@ -41,6 +41,7 @@ $(document).ready(function(){
                 case 37:
                     nav.world.agents.map(function(elem){
                         elem.target = target; 
+                        
                     });
                     break;
                 case 39:

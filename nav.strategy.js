@@ -94,7 +94,7 @@
              */
             windowFunc: function(phi, psi, dPsi) {
                 return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
-                    Math.cos(dPsi + this.sigma))) + 1)
+                    Math.cos(dPsi + this.sigma))) + 1);
             },
 
             /* Repeller function. Gets the repelling power of an obstacle.
@@ -109,7 +109,7 @@
              * In Juan Pablo's code, this is sign.
              */
             signum: function(x) {
-                return (x > 0) ? 1 : (x == 0) ? 0 : -1;
+                return (x > 0) ? 1 : (x === 0) ? 0 : -1;
             },
 
             /* The complete repeller function.
@@ -141,7 +141,7 @@
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
-                var Di, Wi, Ri, fObs, tmp, help, dWi, dRi, dFobs_dPhi, psi, dm, dPsi
+                var Di, Wi, Ri, tmp, help, dWi, dRi, psi, dm, dPsi;
                 
                 /* Each obstacle is an array of the form:
                     [dm, psi, dPsi]
@@ -208,6 +208,7 @@
             /* Get the heading that the agent should be moving in */
             getPhiDot: function(agent, perceivedObs) {
                 var phi = agent.heading;
+                var fObs = 0;
                 var psiTar = this.computeAngle(agent.position, agent.target);
                 agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
                     agent.weights[1], perceivedObs); //of the form [wtar, wobs]
@@ -216,7 +217,7 @@
 					fObs = 0;
 				}
 				else {
-					var fObs = perceivedObs.map(function(elem){
+					fObs = perceivedObs.map(function(elem){
 						return this.fullRepellerFunc(phi, elem);
 					}, this).reduce(function(prev, curr){
 						return prev + curr;
@@ -233,7 +234,9 @@
                                     new Circle(agent.target.position, agent.target.size) :
                                     new Circle(agent.target, 10)),
                     perceivedObs = [],
-                    dm = psi = dPsi = 0;
+                    dm=0,
+                    psi =0,
+                    dPsi = 0;
 
                 this.envObs.map(function(elem){
                     if(elem !== agent){
@@ -301,9 +304,9 @@
         /* Helper function for creating a 2-D Array (Grid) */
         function Grid(rows, cols){
             for(var x = 0; x < rows; ++x){
-                this[x] = new Array(cols);
+                this[x] = [];
                 for(var y = 0; y < cols; ++y){
-                    this[x][y] = 0;
+                    this[x].push(0);
                 }
             }
         }
@@ -339,25 +342,25 @@
             /* Takes a row and a column and returns true if the cell at that position
                is on the world grid and false otherwise. */
             isInWorld: function(col, row) {
-            	return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
+                return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
             
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
             adjacentCells: function(col, row) {
-            	var results = [[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
-            	var final =  results.filter(function(elem){
-            		return this.isInWorld(elem[0],elem[1]); 
-            	}, this);
-            	return final;
+                var results = [[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
+                var final =  results.filter(function(elem){
+                    return this.isInWorld(elem[0],elem[1]); 
+                }, this);
+                return final;
             },
             /**
              * Gets the adjacent cells that are open.
              */
             adjacentOpenCells: function(col,row){
-            	return this.adjacentCells(col,row).filter(function(elem){
-            		return this.data[elem[0]][elem[1]] === 0;
-            	}, this);
+                return this.adjacentCells(col,row).filter(function(elem){
+                    return this.data[elem[0]][elem[1]] === 0;
+                }, this);
             },
             /**
              * Converts a vector from grid space to world space. By the nature of this transformation, some information is lost so we
@@ -486,7 +489,7 @@
              */
             toPath: function(node){
                 var results = [$V([node.state.col, node.state.row])];
-                while(node = node.parent){
+                while(!!(node = node.parent)){
                     results.push($V([node.state.col, node.state.row]));
                 }
                 return results.reverse().map(function(elem){

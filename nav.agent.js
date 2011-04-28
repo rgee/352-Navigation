@@ -9,10 +9,10 @@
 		this.size = size;
 		this.heading = 2*Math.PI;
 		this.speed = 1;
-		this.weights = [0.99, 0.99] //for dynamical, setting here as hack
+		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true
 		dynamical = dynamical || false;
-		this.strategy = (dynamical ? "dynamical" : "") || "A*"
+		this.strategy = (dynamical ? "dynamical" : "") || "A*";
 		this.path = null;
 	}
 	Agent.prototype = {

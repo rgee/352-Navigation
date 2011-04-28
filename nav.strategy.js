@@ -31,7 +31,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 10.0;
+            this.d0 = 100.0;
             this.c1 = 2.0;
             this.c2 = 2.0;
             this.a = 3.0;
@@ -93,8 +93,14 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
+                phi = (Math.PI*2+phi) % (Math.PI*2);
+                psi = (Math.PI*2+psi) % (Math.PI*2);
+                dPsi = (Math.PI*2+dPsi) % (Math.PI*2);
+                
+                console.log(0.5*(Math.tanh(this.h1*(Math.cos(phi - psi)-Math.cos(dPsi + this.sigma))) + 1));
                 return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
                     Math.cos(dPsi + this.sigma))) + 1);
+
             },
 
             /* Repeller function. Gets the repelling power of an obstacle.
@@ -191,6 +197,7 @@
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
                 for (var i = 0; i < 100; i++) {
+                    //w1 is target, w2 is obstacle
                     var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
                     var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
                     w1 += w1dot * this.timestep;
@@ -202,6 +209,7 @@
                 if (!(w2 < 1 && w2 > -1)) {
                     w2 = 0.99;
                 }
+                console.log(w1);
                 return [w1, w2];
             },
             

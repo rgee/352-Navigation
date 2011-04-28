@@ -36,7 +36,6 @@
 
 							// Position = position + (speed * direction)
 							this.position = this.position.add(this.heading.multiply(this.speed));
-
 						}
 					}
 

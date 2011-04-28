@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10, true)];
+    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10)];
     var obstacles = [new Nav.Obstacle("goldfish", $V([400, 300]), 10)];
 
     var nav = new Nav(agents, obstacles);
@@ -8,7 +8,7 @@ $(document).ready(function(){
         proc.setup = function() {
             proc.frameRate(30);
             proc.size(1000,1000);
-        }
+        };
         proc.draw = function(){
             this.background(20);
             this.fill = 200;

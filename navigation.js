@@ -41,7 +41,7 @@ $(document).ready(function(){
                 case 37:
                     nav.world.agents.map(function(elem){
                         elem.target = target; 
-                        
+                        elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
                     });
                     break;
                 case 39:

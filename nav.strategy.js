@@ -348,7 +348,7 @@
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
             adjacentCells: function(col, row) {
-                var results = [[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
+                var results = [[col-1, row-1],[col -1, row+1],[col +1, row -1],[col+1, row+1],[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
                 var final =  results.filter(function(elem){
                     return this.isInWorld(elem[0],elem[1]); 
                 }, this);

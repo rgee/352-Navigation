@@ -5,7 +5,7 @@
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
-		this.speed = 20;
+		this.speed = 50;
 		this.size = size;
 		this.heading = 2*Math.PI;
 		this.speed = 1;

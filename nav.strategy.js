@@ -147,22 +147,30 @@
                     psi = ob[1];
                     dPsi = ob[2];
 
-                    fObs = fObs + this.fullRepellerFunc(phi, ob);
+                    Di = this.distanceFunc(dm);
+                    Wi = this.windowFunc(phi, psi, dPsi);
+                    Ri = this.repellerFunc(phi, psi, dPsi);
+
+                    fObs = fObs + (Di * Wi * Ri);
                     tmp = (1.0/Math.cosh(this.h1 * (Math.cos(phi - psi) - Math.cos(dPsi + this.sigma))));
                     help = (phi - psi)/dPsi;
                     dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
                     dRi = (((dPsi - Math.abs(phi - psi)) * Math.exp(1-Math.abs(help))) / (dPsi * dPsi));
+
                     dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
                     w += Wi;
                 }, this);
+                
+
                 return this.signum(dFobs_dPhi) * Math.exp(-this.c1 * Math.abs(fObs)) * w;
+                
             },
             /* Sees if agent is heading towards a stable point or unstable 
              * point
              */
             gammaObsTar: function(phi, psiTar, obsList) {
                 var pTar = this.targetDetector(phi, psiTar),
-                    pObs = this.obsDetector(phi, obsList); 
+                    pObs = this.obsDetector(phi, obsList);
                 return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             

@@ -6,7 +6,7 @@ $(document).ready(function(){
     
     var draw = function (proc){
         proc.setup = function() {
-            proc.frameRate(10);
+            proc.frameRate(30);
             proc.size(1000,1000);
         }
         proc.draw = function(){

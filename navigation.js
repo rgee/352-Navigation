@@ -1,31 +1,34 @@
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10, true)];
-    var obstacles = [new Nav.Obstacle("goldfish", $V([400, 300]), 10)];
+    var agents = [new Nav.Agent($V([200,150]), $V([50,50]), 10)];
+    var obstacles = [new Nav.Obstacle("goldfish", $V([100, 350]), 10)];
 
     var nav = new Nav(agents, obstacles);
     
     var draw = function (proc){
         proc.setup = function() {
-            proc.frameRate(30);
-            proc.size(1000,1000);
-        }
+            proc.frameRate(60);
+            proc.size(400,300);
+        };
         proc.draw = function(){
             this.background(20);
-            this.fill = 200;
-            this.stroke = 0;
             nav.update();
-            //this.ellipse(agentX, agentY, agent.size[0], agent.size[1]);
-            //this.drawObstacles(worldGrid);
+            this.fill(255,255,255);
             nav.world.agents.map(this.drawAgent, this);
             nav.world.obstacles.map(this.drawObstacle, this);
-            if (nav.world.agents[0].strategy == "A*") {
-                for(var x = 0; x < nav.aStar.grid.xMax/10; x++){
-                    for(var y = 0; y < nav.aStar.grid.yMax/10; y++){
-                        if(nav.aStar.grid.data[x][y]){
-                            this.rect(x * (10),
-                                      y * (10),
-                                      10, 10);
-                        }
+            if(nav.debug){
+                this.drawDebugInfo();
+            }
+        };
+        
+        proc.drawDebugInfo = function(){
+            var cellSize = nav.aStar.grid.cellSize;
+            if (nav.world.agents[0].strategy== "A*") {
+                for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
+                    for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
+                        var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
+                        this.stroke(255,255,0);
+                        this.point(coords.e(1), coords.e(2));
+                        this.stroke(0,0,0);
                     }
                 }
             }
@@ -94,7 +97,6 @@ $(document).ready(function(){
         };
 
         proc.drawObstacle = function(obstacle) {
-            this.fill = 200;
             this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
         };
     };

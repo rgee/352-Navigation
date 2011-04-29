@@ -6,6 +6,7 @@
 
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);
+        this.debug = false;
 	}
 
     Nav.prototype = {
@@ -21,6 +22,9 @@
 
                 agents[i].act();
             }
+            this.world.obstacles.map(function(e){
+                e.update(); 
+            });
         }
            
     };
@@ -32,4 +36,4 @@
 		global.Nav = Nav;
 	}
 
-})(window)
+})(window);

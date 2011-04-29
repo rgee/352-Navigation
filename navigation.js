@@ -1,5 +1,7 @@
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([600,600]), $V([50,50]), 10, true)];
+    var agents = [new Nav.Agent($V([400,600]), $V([50,50]), 10, true)];
+    agents[0].target = ($V([400, 200]));
+    agents[0].heading = 3/2 * Math.PI;
     var obstacles = [new Nav.Obstacle("goldfish", $V([400, 300]), 10)];
 
     var nav = new Nav(agents, obstacles);

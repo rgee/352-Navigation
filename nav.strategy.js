@@ -31,10 +31,10 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 1.0;
+            this.d0 = 0.001;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.0;
+            this.a = 10.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -60,7 +60,11 @@
                      oRad=obs.radius;
                 var bigRad=aRad+oRad;
                 var d=aPos.distanceFrom(oPos);
+                if (d < bigRad) {
+                    d = bigRad;
+                }
                 var theta=2*(Math.asin(bigRad/d));
+                //console.log(theta);
                 return theta;
             },
 
@@ -68,7 +72,6 @@
              * In Juan Pablo's code, this is fTar
              */
             calculateAttraction: function(phi, psiTar) {
-                //console.log("phi\t" + phi + "\tpsiTar\t" + psiTar + "\tMath.sin(phi - psiTar)\t" + Math.sin(phi - psiTar));
                 return -this.a * Math.sin(phi - psiTar);
             },
             
@@ -81,7 +84,7 @@
 
             /* Adjusts need to avoid obstacles */
             alphaObs: function(phi, perceivedObs) {
-				if (perceivedObs.length === 0) { return 0;}
+                if (perceivedObs.length === 0) { return 0;}
                 return Math.tanh(perceivedObs.map(function(ob){
                                     return this.distanceFunc(ob[2]);
                                 },this).reduce(function(prev, curr){
@@ -93,8 +96,13 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
-                return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
-                    Math.cos(dPsi + this.sigma))) + 1);
+                var phiPsi = Math.cos(phi - psi + Math.PI); 
+                var dPsiSigma = Math.cos(dPsi + this.sigma);
+                var tan = Math.tanh(this.h1 * (phiPsi - dPsiSigma)) + 1;
+                //console.log(phi + "\t" + psi + "\t" + phiPsi + "\t" + dPsiSigma + "\t" + tan);
+                return 0.5*(tan);
+                //return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
+                //    Math.cos(dPsi + this.sigma) + Math.PI)) + 1);
             },
 
             /* Repeller function. Gets the repelling power of an obstacle.
@@ -102,7 +110,7 @@
              */
             repellerFunc: function(phi, psi, dPsi) {
                 return ((phi - psi)/dPsi) *
-                Math.exp(1 - Math.abs((phi - psi)/dPsi));
+                    Math.exp(1 - Math.abs((phi - psi)/dPsi));
             },
             
             /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -119,6 +127,7 @@
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]),
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
+                console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
                 return dist * win * rep;
             },
 
@@ -127,8 +136,6 @@
              */
             targetDetector: function(phi, psiTar) {
                 var dFtar_dPhi = this.a * Math.cos(phi - psiTar);
-                /*console.log(this.signum(dFtar_dPhi) + "\t" + -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
-                    Math.abs(this.calculateAttraction(phi, psiTar))) + "\t" + this.calculateAttraction(phi, psiTar));*/
                 return -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
                     Math.abs(this.calculateAttraction(phi, psiTar)));
             },
@@ -137,7 +144,6 @@
              * In Juan Pablo's code, this is P_obs
              */
             obsDetector: function(phi, obsList) {
-                /* RABBIT HOLE BEGINS HERE. RETURNS NaN */
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
@@ -172,10 +178,9 @@
             /* Sees if agent is heading towards a stable point or unstable 
              * point
              */
-            gammaObsTar: function(phi, psiTar, obsList) {
+            gammaObsTar: function(phi, psiTar, perceivedObs) {
                 var pTar = this.targetDetector(phi, psiTar),
-                    pObs = this.obsDetector(phi, obsList);
-				//console.log("pTar\t" + pTar + "\tObs\t" + pObs + "\t" + Math.exp(-1 * this.c2 * pTar * pObs - this.c2));
+                    pObs = this.obsDetector(phi, perceivedObs);
                 return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             
@@ -183,6 +188,7 @@
              * In Juan Pablo's code, this is fTar.
              */
             defAttractor: function(phi, psiTar) {
+
                 return this.a * Math.sin(phi - psiTar);
             },
 
@@ -202,6 +208,7 @@
                 if (!(w2 < 1 && w2 > -1)) {
                     w2 = 0.99;
                 }
+               // console.log(w1 + "\t" + w2);
                 return [w1, w2];
             },
             
@@ -223,6 +230,7 @@
 						return prev + curr;
 					});
 				}
+                //console.log(Math.abs(agent.weights[1]) * fObs + "\t" + Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar));
                 return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     (Math.abs(agent.weights[1]) * fObs) + 0.01*(Math.random()-0.5);
             },
@@ -243,6 +251,8 @@
                         dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
+                        psi = (Math.PI * 2 + psi) % (Math.PI * 2);
+                        dPsi = (Math.PI * 2 + dPsi) % (Math.PI * 2);
                         perceivedObs.push([dm, psi, dPsi]); 
                     }
                 },this);

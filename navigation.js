@@ -1,9 +1,10 @@
 
 $(document).ready(function(){
-    var agents = [new Nav.Agent($V([400,600]), $V([50,50]), 10, true)];
+    var agents = [new Nav.SupportAgent($V([400,600]), $V([50,50]), 10, true)];
     agents[0].target = ($V([400, 200]));
     agents[0].heading = 3/2 * Math.PI;
     var obstacles = [new Nav.Obstacle("goldfish", $V([100, 350]), 10)];
+    var support = new Nav.SupportAgent($V([400,600]), $V([50,50]), 10, true);
 
     var nav = new Nav(agents, obstacles);
     
@@ -63,10 +64,13 @@ $(document).ready(function(){
         };
 
         proc.drawAgent = function(agent){
+
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
+            this.fill(255, agent.health*255 ,agent.health*255 );
             this.ellipse(agent.position.e(1), agent.position.e(2), 10, 10);
+            this.fill(255,255,255);
             //draw target
             if(agent.target !== null) {
                 this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);

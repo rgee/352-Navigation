@@ -7,6 +7,8 @@
 		this.interTarget = null;
 		this.speed = 5;
 		this.size = size;
+        
+        // [0,1]
         this.health = 1.0;
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack

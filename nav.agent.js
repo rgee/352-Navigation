@@ -58,7 +58,32 @@
 			}
 		}
 	};
+    
+    // An agent that has the ability to choose to help another agent.
+    function SupportAgent(position, velocity, size, dynamical){
+    	this.position = position;
+		this.velocity = velocity;
+		this.target = null;
+		this.interTarget = null;
+		this.speed = 5;
+		this.size = size;
+		this.heading = 2*Math.PI;
+		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
+        // Default to A* navigation unless the dynamical flag is true
+		dynamical = dynamical || false;
+		this.strategy = (dynamical ? "dynamical" : "") || "A*";
+		this.path = null;
+    }
+    SupportAgent.prototype = new  Agent();
+    SupportAgent.prototype.constructor = SupportAgent;
+    
+    $.extend(SupportAgent.prototype, {
+       seekTarget: function(){
+           
+       }
+    });
 
 	// Expose Agent constructor to main module
 	Nav.Agent = Agent;
+    Nav.SupportAgent = SupportAgent;
 })();

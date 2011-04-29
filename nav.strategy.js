@@ -385,6 +385,9 @@
                 var cellSize = (this.xMax / this.nCols);
                 return Vector.create( [(pos.e(1) * cellSize) + cellSize/2, (pos.e(2) * cellSize) + cellSize/2] );  
             },
+            pairToWorld: function(col, row){
+                return Vector.create( [(col * this.cellSize) + this.cellSize / 2, (row * this.cellSize) + this.cellSize/2] );
+            },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
                                        Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
@@ -445,7 +448,7 @@
 		 * Output: The last node in the search path of an optimal solution.
 		 */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 90000,
+			var maxExpansions = 10000,
 			    nodesExpanded = 0,
 			    start = new Node(initialState),
 				closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);}),
@@ -485,7 +488,12 @@
 		 * Output: The straight line disance between the two points the states represent.
 		 */
 		function straightLineDist(currState, goalState){
-			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
+            /*
+            var currWorld = currState.grid.pairToWorld(currState.col, currState.row),
+                goalWorld = goalState.grid.pairToWorld(goalState.col, goalState.row);
+			return (Math.pow((currWorld.e(2) - goalWorld.e(2)),2) + Math.pow((currWorld.e(1) - goalWorld.e(1)),2));
+            */
+            return Math.sqrt((Math.pow(currState.row - goalState.row,2) + Math.pow(currState.col - goalState.col,2)));
 		}
 
 		/* A* navigation strategy object */
@@ -493,7 +501,7 @@
             this.world = world;
             
             // Create the world grid here
-            this.grid = new WorldGrid(20,400,300);
+            this.grid = new WorldGrid(10,400,300);
             this.updateRepresentation();
 		}
 		AStar.prototype = {
@@ -502,14 +510,17 @@
              * Input: A node that is the final node in a search path.
              * Output: An array of vectors representing the path in grid space.
              */
-            toPath: function(node){
+            toPath: function(node, agent){
+
                 var results = [$V([node.state.col, node.state.row])];
-                while(!!(node = node.parent)){
+                while((node = node.parent)){
                     results.push($V([node.state.col, node.state.row]));
                 }
-                return results.reverse().map(function(elem){
+                results =  results.reverse().map(function(elem){
                     return this.grid.toWorldSpace(elem);
                 }, this);
+                results.shift();
+                return results;
             },
 			/* Generate the navigation path for the agent to follow */
 			plan: function(){
@@ -525,21 +536,19 @@
                 },this);
             },
 			execute: function(agent){
-                if(agent.path === null && agent.target !== null){
-                   
-    				var gridSpacePos = this.grid.toGridSpace(agent.position),
-    				    gridSpaceTar = this.grid.toGridSpace(agent.target),
-    				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
-    				    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
-    				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
-    				    heuristic = straightLineDist,
-    				    result = heuristicSearch(initial, goal, fringe, heuristic);
+                if(agent.target !== null){
+                    this.updateRepresentation();
+        			var gridSpacePos = this.grid.toGridSpace(agent.position),
+        			    gridSpaceTar = this.grid.toGridSpace(agent.target),
+        			    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+        			    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+        			    fringe = new BinHeap(function(node){ return (node.h + node.g); }),
+        			    heuristic = straightLineDist,
+        			    result = heuristicSearch(initial, goal, fringe, heuristic);
                     if(result !== null){
-    				    agent.path = this.toPath(result);
+        			    agent.path = this.toPath(result, agent);
                     }
-
                 }
-                this.updateRepresentation();
 			}
 		};
 		Strategy.AStar = AStar;

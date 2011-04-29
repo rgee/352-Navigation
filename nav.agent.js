@@ -5,7 +5,7 @@
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
-		this.speed = 1;
+		this.speed = 5;
 		this.size = size;
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
@@ -19,25 +19,35 @@
 			switch(this.strategy){
 				case "A*":
 					if(this.path !== null){
-						if(this.interTarget === null){
-							this.interTarget = this.path.shift();
+						if(this.path.length > 0){
+                            var next = this.path.shift();
+                            while(next.distanceFrom(this.position) <= 0.5 ||
+                                  next.distanceFrom(this.target) > this.position.distanceFrom(this.target)&&
+                                  this.path.length > 0){
+                                next = this.path.shift();
+                            }
+                            this.interTarget = next;
 						}
-                        
-						if(this.position.distanceFrom(this.interTarget) <= 0.5){
-							if(this.path.length === 0){
+                        if(this.path.length === 0){
+                                console.log('final agent pos: ' + this.position.inspect());
 								this.path = this.interTarget = this.target = null;
-							} else {
-								this.interTarget = this.path.shift();
-							}
-						} else {
+                                return;
+                        }
+                        
+
 
 							// Heading = The unitized vector representing (position - intermediate target)
 							this.heading = this.interTarget.subtract(this.position).toUnitVector();
-
                             // Position = position + (speed * direction)
 							this.position = this.position.add(this.heading.multiply(this.speed));
-
-						}
+                            this.interTarget = null;
+                        
+/*
+                        this.interTarget = this.path.shift();
+                        this.heading = this.interTarget.subtract(this.position).toUnitVector();
+                        
+                        this.position = this.position.add(this.heading.multiply(this.speed));
+                    */
 					}
 
 

@@ -5,8 +5,13 @@
 		this.position = position;
         this.size = size;
 	}
-	Obstacle.prototype = {
-	};
+	Obstacle.prototype ={   
+        update: function(){
+
+            
+        }
+    };
+
 
 	// Expose Agent constructor to main module
 	Nav.Obstacle = Obstacle;

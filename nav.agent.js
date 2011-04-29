@@ -7,6 +7,7 @@
 		this.interTarget = null;
 		this.speed = 5;
 		this.size = size;
+        this.health = 1.0;
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true
@@ -60,7 +61,8 @@
 	};
     
     // An agent that has the ability to choose to help another agent.
-    function SupportAgent(position, velocity, size, dynamical){
+    function SupportAgent(position, velocity, size, dynamical, world){
+        this.world = world;
     	this.position = position;
 		this.velocity = velocity;
 		this.target = null;
@@ -73,13 +75,43 @@
 		dynamical = dynamical || false;
 		this.strategy = (dynamical ? "dynamical" : "") || "A*";
 		this.path = null;
+        this.priorities = {
+                            "help" : 1.0,
+                            "escape" : 0.5
+                          };
     }
     SupportAgent.prototype = new  Agent();
     SupportAgent.prototype.constructor = SupportAgent;
     
     $.extend(SupportAgent.prototype, {
        seekTarget: function(){
+           var hurtAgents = this.world.agents.filter(function(e){
+              return e.health < 0.5; 
+           });
            
+           var that = this;
+           var distComparator = function(a,b){
+              var bDist = that.position.distanceFrom(b),
+                  aDist = that.position.distanceFrom(a);
+                  
+              if(a < b) return -1;
+              if(a > b) return 1;
+              return 0;
+           };
+           
+           // If there's only one agent in need of help, go for it.
+           if(hurtAgents.length === 1){
+               return hurtAgents[0];
+           } else if(hurtAgents.length === 0){
+               return null;
+           } else {
+              // If there are many, sort them and return the closest one.
+              hurtAgents = hurtAgents.sort(distComparator);
+              return hurtAgents[0];
+           }
+       },
+       // Handle logic of this agent being hurt.
+       harm : function(){
        }
     });
 

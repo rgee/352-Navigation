@@ -1,12 +1,17 @@
 
 $(document).ready(function(){
-    var agents = [new Nav.SupportAgent($V([400,600]), $V([50,50]), 10, true)];
-    agents[0].target = ($V([400, 200]));
-    agents[0].heading = 3/2 * Math.PI;
-    var obstacles = [new Nav.Obstacle("goldfish", $V([100, 350]), 10)];
-    var support = new Nav.SupportAgent($V([400,600]), $V([50,50]), 10, true);
+    var world = new Nav.World();
+        world.agents = [];
+        world.obstacles = [];
+    world.agents.push(new Nav.Agent($V([400,600]), $V([50,50]), 10, true));
+    world.agents[0].target = ($V([400, 200]));
+    world.agents[0].heading = 3/2 * Math.PI;
+    world.obstacles.push(new Nav.Obstacle("goldfish", $V([100, 350]), 10));
 
-    var nav = new Nav(agents, obstacles);
+
+
+
+    var nav = new Nav(world);
     
     var draw = function (proc){
         proc.setup = function() {
@@ -50,9 +55,18 @@ $(document).ready(function(){
                         elem.target = target; 
                         elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
                     });
+                    /*
+                    var newAgent = new Nav.SupportAgent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true, nav.world);
+                    nav.world.agents.push(newAgent);
+                    */
                     break;
                 case 39:
                     nav.world.obstacles.push(new Nav.Obstacle("goldfish", target, 10));
+                    /*
+                    var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
+                    newAgent.health = Math.random();
+                    nav.world.agents.push(newAgent);
+                    */
                     break;
                 default:
                     break;

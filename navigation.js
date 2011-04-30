@@ -61,7 +61,7 @@ $(document).ready(function(){
                     */
                     break;
                 case 39:
-                    nav.world.obstacles.push(new Nav.Obstacle("goldfish", target, 10));
+                    nav.world.addWall(target, 100, 'h');
                     /*
                     var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
                     newAgent.health = Math.random();
@@ -118,7 +118,14 @@ $(document).ready(function(){
         };
 
         proc.drawObstacle = function(obstacle) {
-            this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
+            if(obstacle.type === 'wall'){
+                this.stroke(255,255,255);
+                this.strokeWeight(10);
+                this.line(obstacle.endPoints[0].e(1), obstacle.endPoints[0].e(2), obstacle.endPoints[1].e(1), obstacle.endPoints[1].e(2));
+                this.strokeWeight(1);
+            }else{
+                this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
+            }
         };
     };
 

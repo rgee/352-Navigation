@@ -3,10 +3,10 @@ $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];
         world.obstacles = [];
-    world.agents.push(new Nav.Agent($V([400,600]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([400,600]), $V([50,50]), 10));
     world.agents[0].target = ($V([400, 200]));
     world.agents[0].heading = 3/2 * Math.PI;
-    world.obstacles.push(new Nav.Obstacle("goldfish", $V([100, 350]), 10));
+    world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
 
 
 
@@ -23,9 +23,12 @@ $(document).ready(function(){
             nav.update();
             this.fill(255,255,255);
             nav.world.agents.map(this.drawAgent, this);
-            nav.world.obstacles.map(this.drawObstacle, this);
+
             if(nav.debug){
                 this.drawDebugInfo();
+                
+            } else {
+                nav.world.obstacles.map(this.drawObstacle, this);   
             }
         };
         
@@ -35,6 +38,12 @@ $(document).ready(function(){
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
+                        if(nav.aStar.grid.data[x][y] === 1){
+                            this.fill(255,255,255);
+                            this.rect(coords.e(1),coords.e(2),10,10); 
+
+                        }
+                        
                         this.stroke(255,255,0);
                         this.point(coords.e(1), coords.e(2));
                         this.stroke(0,0,0);
@@ -61,7 +70,8 @@ $(document).ready(function(){
                     */
                     break;
                 case 39:
-                    nav.world.addWall(target, 100, 'h');
+                    //nav.world.addWall(target, 100, 'h');
+                    nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
                     /*
                     var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
                     newAgent.health = Math.random();

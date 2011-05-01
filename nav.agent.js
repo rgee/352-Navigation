@@ -5,8 +5,9 @@
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
-		this.speed = 5;
+		this.speed = 2;
 		this.size = size;
+        this.id = null;
         
         // [0,1]
         this.health = 1.0;
@@ -21,18 +22,19 @@
 		act: function() {
 			switch(this.strategy){
 				case "A*":
+                /*
 					if(this.path !== null){
-						if(this.path.length > 0){
+                        
+						if(this.path.length > 0 && this.interTarget === null){
                             var next = this.path.shift();
+                            
                             while(next.distanceFrom(this.position) <= 0.5 ||
                                   next.distanceFrom(this.target) > this.position.distanceFrom(this.target)&&
                                   this.path.length > 0){
                                 next = this.path.shift();
                             }
                             this.interTarget = next;
-						}
-                        if(this.path.length === 0){
-                                console.log('final agent pos: ' + this.position.inspect());
+						}else if(this.path.length === 0) {
 								this.path = this.interTarget = this.target = null;
                                 return;
                         }
@@ -43,8 +45,17 @@
 							this.heading = this.interTarget.subtract(this.position).toUnitVector();
                             // Position = position + (speed * direction)
 							this.position = this.position.add(this.heading.multiply(this.speed));
-                            this.interTarget = null;
+                            if(this.position.distanceFrom(this.interTarget) <= 1){
+                                this.interTarget = null;
+                            }
 					}
+                    */
+                    
+                    if(this.interTarget){
+                        this.heading = this.interTarget.subtract(this.position).toUnitVector();
+                        
+                        this.position = this.position.add(this.heading.multiply(this.speed));
+                    }
 
 
 					break;

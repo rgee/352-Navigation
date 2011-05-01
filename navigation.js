@@ -40,6 +40,7 @@ $(document).ready(function(){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
                         if(nav.aStar.grid.data[x][y] === 1){
                             this.fill(255,255,255);
+                            this.rectMode(3);
                             this.rect(coords.e(1),coords.e(2),10,10); 
 
                         }

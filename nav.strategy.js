@@ -587,7 +587,7 @@
                 
             },
             pathInvalid: function(path){
-                if(!path || path.length == 0){
+                if(!path || path.length === 0){
                     return true;    
                 }
                 // We only care about obstructions along the first maxDistance nodes of the path

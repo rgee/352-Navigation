@@ -7,7 +7,7 @@ $(document).ready(function(){
 //    world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
-    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 5, true));
 
     world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addWall($V([350,200]), 100, 'h');
@@ -61,7 +61,7 @@ $(document).ready(function(){
                 this.noFill();
                 this.stroke(255,255,255);
                 nav.dynamical.envObs.forEach(function(elem){
-                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius, elem.radius);
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
                 },this);
                 this.stroke(0,0,0);
                 this.fill();
@@ -105,7 +105,7 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size, agent.size);
+            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size*2, agent.size*2);
             
             //draw target
             if(agent.target !== null) {

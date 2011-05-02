@@ -259,8 +259,8 @@
                         dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
-                        psi = (Math.PI * 2 + psi);
-                        dPsi = (Math.PI * 2 + dPsi);
+                        psi = psi;
+                        dPsi = dPsi;
                         perceivedObs.push([dm, psi, dPsi]); 
                     }
                 },this);
@@ -279,7 +279,7 @@
                         if(dm<0){
                             collision(agent, elem);
                             agent.heading = this.computeAngle(agent.position, obsCirc.center);
-                            agent.heading = agent.heading%(Math.PI*2);
+                            agent.heading = agent.heading;
                         }
                         this.envObs.push(obsCirc);
                     }
@@ -335,7 +335,7 @@
 
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
-                    if(agent.position.distanceFrom(agent.target) <= (agent.size + 10)){
+                    if(agent.position.distanceFrom(agent.target) <= (agent.size+5)){
                         agent.target = null;
                     }
                 }

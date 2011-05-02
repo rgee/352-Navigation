@@ -3,11 +3,11 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
-    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([400,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,75]), $V([30,30]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,405]), $V([30,30]), 5, true));
+    //world.addAgent(new Nav.Agent($V([75,475]), $V([30,30]), 5, true));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([30,30]), 5, true));
+    world.addAgent(new Nav.Agent($V([400,75]), $V([30,30]), 5, true));
     //top left is 50,50; bottom right is 750,550
     world.addExt($V([399,50]), 800, 'n');
     world.addExt($V([399,550]), 800, 's');

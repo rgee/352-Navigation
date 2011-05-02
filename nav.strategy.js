@@ -40,16 +40,16 @@
             this.envObs = [];
             //Parameters
 
-            this.d0 = 30;
+            this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.3;
+            this.a = 3;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
-            this.aTar = 0.3;
+            this.aTar = 0.4;
             //advantage of going to target over obstacle
-            this.gTarObs = 0.05;
+            this.gTarObs = 0.01;
             this.timestep = 0.05;
 		}
 
@@ -262,7 +262,6 @@
                         if(dm<0){
                             collision(agent, elem);
                             agent.heading = this.computeAngle(agent.position, obsCirc.center);
-                            agent.heading = agent.heading;
                         }
                         this.envObs.push(obsCirc);
                     }
@@ -296,7 +295,7 @@
                     dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                     if(dm<0){
                         collision(agent, elem);
-                        agent.heading = (agent.heading+Math.PI);
+                        agent.heading = this.computeAngle(agent.position,obsCirc.center)+.1*(Math.random()-.5);
                         while(agent.heading>Math.PI){ agent.heading -= 2*Math.PI}
                         while(agent.heading<-Math.PI){ agent.heading += 2*Math.PI}
                     }

@@ -28,7 +28,6 @@ $(document).ready(function(){
 
             if(nav.debug){
                 this.drawDebugInfo();
-                
             } else {
                 nav.world.obstacles.map(this.drawObstacle, this);   
             }
@@ -36,7 +35,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy== "dynamical") {
+            if (nav.world.agents[0].strategy === "A*") {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -55,7 +54,13 @@ $(document).ready(function(){
             }
             //Dynamical systems
             else {
-
+                this.noFill();
+                this.stroke(255,255,255);
+                nav.dynamical.envObs.forEach(function(elem){
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                },this);
+                this.stroke(0,0,0);
+                this.fill();
             }
         };
         

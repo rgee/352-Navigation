@@ -128,7 +128,7 @@
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]),
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
-                console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
+                //console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
                 return dist * win * rep;
             },
 

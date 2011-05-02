@@ -8,6 +8,7 @@
 		this.speed = 2;
 		this.size = size;
         this.id = null;
+        this.alive = true;
         
         // [between 0 and 1]
         this.health = 1.0;
@@ -39,7 +40,14 @@
 				default:
 					break;
 			}
-		}
+		},
+        takeDamage: function(){
+            if(this.health){
+                this.health -=  0.1;    
+                if(this.health < 0) this.health = 0;
+            }
+            this.alive = !!this.health;
+        }
 	};
     
     // An agent that has the ability to choose to help another agent.
@@ -49,6 +57,7 @@
 		this.velocity = velocity;
 		this.target = null;
 		this.interTarget = null;
+        this.alive = true;
 		this.speed = 5;
 		this.size = size;
 		this.heading = 2*Math.PI;
@@ -101,8 +110,13 @@
            }
        },
        // Handle logic of this agent being hurt.
-       harm : function(){
-       },
+        takeDamage: function(){
+            if(this.health){
+                this.health -=  0.1;    
+                if(this.health < 0) this.health = 0;
+            }
+            this.alive = !!this.health;
+        },
        // Help another agent. Specifics TBD.
        assist : function(agent){
        },

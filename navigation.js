@@ -52,7 +52,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy === "A*") {
+            if (nav.world.agents.some(function(e){ return e.strategy === 'A*';})) {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -82,6 +82,7 @@ $(document).ready(function(){
             }
         };
         
+        // Respond to mouse events.
         proc.mousePressed = function() {
             var target = $V([this.mouseX, this.mouseY]);
             switch(this.mouseButton){
@@ -98,9 +99,9 @@ $(document).ready(function(){
                     break;
             }
         };
-
+        
+        // Draw an agent in the world.
         proc.drawAgent = function(agent){
-
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
@@ -120,7 +121,7 @@ $(document).ready(function(){
             }
         };
 
-        //Visualize a path in a grid.
+        // Visualize a path in a grid.
         proc.drawPath = function(path, grid) {
            var node = 0,
                numNodes = path.length,
@@ -142,6 +143,7 @@ $(document).ready(function(){
             }
         };
 
+        // Draw an obstacle in the world
         proc.drawObstacle = function(obstacle) {
             switch(obstacle.type){
                 case 'exterior':

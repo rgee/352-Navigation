@@ -78,7 +78,6 @@
              * In Juan Pablo's code, this is D
              */
             distanceFunc: function(dm) {
-            	//console.log(dm + "\t" + dm/this.d0 + "\t" + Math.exp(-1 * (dm/this.d0)));
                 return Math.exp(-1 * (dm/this.d0));
             },
 
@@ -96,12 +95,10 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
-                var phiPsi = Math.cos(phi - psi);
+                var phiPsi = Math.cos(phi - psi + Math.PI);
                 var dPsiSigma = Math.cos(dPsi + this.sigma);
                 var tan = Math.tanh(this.h1 * (phiPsi - dPsiSigma)) + 1;
                 return 0.5*(tan);
-                //return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
-                //    Math.cos(dPsi + this.sigma) + Math.PI)) + 1);
             },
 
             /* Repeller function. Gets the repelling power of an obstacle.
@@ -228,9 +225,9 @@
 					});
 				}
 				weightedObs = (Math.abs(agent.weights[1]) * fObs) % (Math.PI * 2);
+                console.log(Math.abs(agent.weights[1]) * fObs);
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     weightedObs + 0.01*(Math.random()-0.5);
-				//console.log(phiDot + "\t" + (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + "\t" + (Math.abs(agent.weights[1] * fObs)));
                 return phiDot;
             },
 
@@ -249,7 +246,6 @@
                 this.envObs.map(function(elem){
                     if(elem !== agent){
                         dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
-                        //console.log(dm);
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
                         psi = (Math.PI * 2 + psi) % (Math.PI * 2);
@@ -301,20 +297,19 @@
                  * is dependent on the old heading*/
                 if (agent.target !== null) {
                     this.updateRepresentation(agent);
-//                    console.log(this.envObs);
                     var perceivedObs = this.sense(agent),
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,
                         oldHeading = agent.heading,
-                        xd = 50 * Math.cos(agent.heading),
-                        yd = 50 * Math.sin(agent.heading);
+                        xd = vel.e(1) * Math.cos(agent.heading),
+                        yd = vel.e(2) * Math.sin(agent.heading);
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
 
                     agent.heading = (newHeading + 2 * Math.PI) % (2 * Math.PI);
                     agent.position = $V([newX, newY]);
-                    if(agent.position.distanceFrom(agent.target) <= 20){
+                    if(agent.position.distanceFrom(agent.target) <= (agent.size + 10)){
                         agent.target = null;
                     }
                 }

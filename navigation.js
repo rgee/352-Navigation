@@ -5,15 +5,15 @@ $(document).ready(function(){
 
 
     world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
-    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
+   // world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
 
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
-    world.addExt($V([400,50]), 800, 'n');
-    world.addExt($V([400,550]), 800, 's');
-    world.addExt($V([750,300]), 600, 'e');
-    world.addExt($V([50,300]), 600, 'w');
+    //world.addExt($V([400,50]), 800, 'n');
+    //world.addExt($V([400,550]), 800, 's');
+    //world.addExt($V([750,300]), 600, 'e');
+    //world.addExt($V([50,300]), 600, 'w');
 
 
     var nav = new Nav(world);
@@ -60,7 +60,7 @@ $(document).ready(function(){
                 this.noFill();
                 this.stroke(255,255,255);
                 nav.dynamical.envObs.forEach(function(elem){
-                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius, elem.radius);
                 },this);
                 this.stroke(0,0,0);
                 this.fill();
@@ -104,12 +104,12 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size, agent.size);
             
             //draw target
             if(agent.target !== null) {
                 this.fill(100, 255, 65);
-                this.ellipse(agent.target.e(1), agent.target.e(2), 20, 20);
+                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
             }
         };
 
@@ -146,11 +146,10 @@ $(document).ready(function(){
                 this.line(obstacle.endPoints[0].e(1), obstacle.endPoints[0].e(2), obstacle.endPoints[1].e(1), obstacle.endPoints[1].e(2));
                 this.strokeWeight(1);
             }else{
-                this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
+                this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
             }
         };
     };
 
 	var proc = new Processing(document.getElementById('display'), draw);
-	/*proc.size(800,600);*/
 });

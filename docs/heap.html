@@ -1,0 +1,116 @@
+<!DOCTYPE html>  <html> <head>   <title>heap.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="heap.html">                 heap.js               </a>                                           <a class="source" href="nav.agent.html">                 nav.agent.js               </a>                                           <a class="source" href="nav.core.html">                 nav.core.js               </a>                                           <a class="source" href="nav.obstacle.html">                 nav.obstacle.js               </a>                                           <a class="source" href="nav.strategy.html">                 nav.strategy.js               </a>                                           <a class="source" href="nav.world.html">                 nav.world.js               </a>                                           <a class="source" href="navigation.html">                 navigation.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               heap.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">BinHeap</span><span class="p">(</span><span class="nx">scoreFunc</span><span class="p">){</span>
+	<span class="k">this</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[];</span>
+	<span class="k">this</span><span class="p">.</span><span class="nx">scorer</span> <span class="o">=</span> <span class="nx">scoreFunc</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">BinHeap</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+	<span class="nx">push</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+		<span class="k">this</span><span class="p">.</span><span class="nx">bubbleUp</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+	<span class="p">},</span>
+	
+	<span class="nx">isEmpty</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="p">},</span>
+	
+	<span class="nx">pop</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+		<span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+		<span class="kd">var</span> <span class="nx">end</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+		
+		<span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+			<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">end</span><span class="p">;</span>
+			<span class="k">this</span><span class="p">.</span><span class="nx">bubbleDown</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+	<span class="p">},</span>
+	<span class="nx">remove</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">){</span>
+		<span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+			<span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">node</span><span class="p">){</span>
+				<span class="kd">var</span> <span class="nx">end</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+				<span class="k">if</span><span class="p">(</span><span class="nx">i</span> <span class="o">!=</span> <span class="nx">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">){</span>
+					<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">end</span><span class="p">;</span>
+					<span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">end</span><span class="p">)</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">node</span><span class="p">)){</span>
+						<span class="k">this</span><span class="p">.</span><span class="nx">bubbleUp</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+					<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+						<span class="k">this</span><span class="p">.</span><span class="nx">bubbleDown</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+				<span class="k">return</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">},</span>
+	
+	<span class="nx">bubbleUp</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">idx</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">idx</span><span class="p">];</span>
+		<span class="kd">var</span> <span class="nx">parentIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+		
+		<span class="k">while</span><span class="p">(</span><span class="nx">idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+
+			<span class="nx">parentIndex</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">((</span><span class="nx">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="nx">parent</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">parentIndex</span><span class="p">];</span>
+
+			<span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">parent</span><span class="p">))</span> <span class="p">{</span>
+				<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">parentIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">;</span>
+				<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nx">parent</span><span class="p">;</span>
+				<span class="nx">idx</span> <span class="o">=</span> <span class="nx">parentIndex</span><span class="p">;</span>
+			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+
+				<span class="k">break</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">},</span>
+	
+	<span class="nx">bubbleDown</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">idx</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kd">var</span> <span class="nx">length</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+			<span class="nx">element</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">idx</span><span class="p">],</span>
+			<span class="nx">elemScore</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">element</span><span class="p">),</span>
+			<span class="nx">child2N</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+			<span class="nx">child1N</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+			<span class="nx">swap</span> <span class="o">=</span> <span class="kc">null</span><span class="p">,</span>
+			<span class="nx">child2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">while</span><span class="p">(</span><span class="kc">true</span><span class="p">){</span>
+			<span class="nx">child2N</span> <span class="o">=</span> <span class="p">(</span><span class="nx">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+			<span class="nx">child1N</span> <span class="o">=</span> <span class="nx">child2N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+			<span class="nx">swap</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+			<span class="k">if</span><span class="p">(</span><span class="nx">child1N</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">){</span>
+				<span class="kd">var</span> <span class="nx">child1</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">child1N</span><span class="p">],</span>
+					<span class="nx">child1Score</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">child1</span><span class="p">);</span>
+				<span class="k">if</span><span class="p">(</span><span class="nx">child1Score</span> <span class="o">&lt;</span> <span class="nx">elemScore</span><span class="p">){</span>
+					<span class="nx">swap</span> <span class="o">=</span> <span class="nx">child1N</span><span class="p">;</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+			<span class="k">if</span><span class="p">(</span><span class="nx">child2N</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">){</span>
+				<span class="kd">var</span> <span class="nx">child2</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">child2N</span><span class="p">],</span>
+					<span class="nx">child2Score</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">scorer</span><span class="p">(</span><span class="nx">child2</span><span class="p">);</span>
+				<span class="k">if</span><span class="p">(</span><span class="nx">child2Score</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nx">swap</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">elemScore</span> <span class="o">:</span> <span class="nx">child1Score</span><span class="p">)){</span>
+					<span class="nx">swap</span> <span class="o">=</span> <span class="nx">child2N</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+			<span class="k">if</span><span class="p">(</span><span class="nx">swap</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">){</span>
+				<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">swap</span><span class="p">];</span>
+				<span class="k">this</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">swap</span><span class="p">]</span> <span class="o">=</span> <span class="nx">element</span><span class="p">;</span>
+				<span class="nx">idx</span> <span class="o">=</span> <span class="nx">swap</span><span class="p">;</span>
+			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+				<span class="k">break</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>var left = 2 * idx;
+var right = (2 * idx) + 1;
+var largest = idx;
+var length = this.data.length;
+var temp = null;</p>             </td>             <td class="code">               <div class="highlight"><pre>		</pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>if(left &lt;= length &amp;&amp; this.scorer(this.data[left]) > this.scorer(this.data[idx])) {
+    largest = left;
+}</p>             </td>             <td class="code">               <div class="highlight"><pre>		</pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>if(right &lt;= length &amp;&amp; this.scorer(this.data[right]) > this.scorer(this.data[largest])) {
+    largest = right;
+}</p>             </td>             <td class="code">               <div class="highlight"><pre>		</pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>if(largest !== idx) {
+    temp = this.data[idx];
+    this.data[idx] = this.data[largest];
+    this.data[largest] = temp;
+    this.bubbleDown(largest);
+}</p>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="p">}</span>
+<span class="p">};</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

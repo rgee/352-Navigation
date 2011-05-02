@@ -1,4 +1,3 @@
-
 $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];

@@ -31,6 +31,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
+
             this.d0 = 20;
             this.c1 = 2.0;
             this.c2 = 2.0;
@@ -64,7 +65,6 @@
                     d = bigRad;
                 }
                 var theta=2*(Math.asin(bigRad/d));
-                //console.log(theta);
                 return theta;
             },
 
@@ -79,6 +79,7 @@
              * In Juan Pablo's code, this is D
              */
             distanceFunc: function(dm) {
+            	//console.log(dm + "\t" + dm/this.d0 + "\t" + Math.exp(-1 * (dm/this.d0)));
                 return Math.exp(-1 * (dm/this.d0));
             },
 
@@ -96,11 +97,9 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
-
-                var phiPsi = Math.cos(phi - psi + Math.PI); 
+                var phiPsi = Math.cos(phi - psi);
                 var dPsiSigma = Math.cos(dPsi + this.sigma);
                 var tan = Math.tanh(this.h1 * (phiPsi - dPsiSigma)) + 1;
-                //console.log(phi + "\t" + psi + "\t" + phiPsi + "\t" + dPsiSigma + "\t" + tan);
                 return 0.5*(tan);
                 //return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
                 //    Math.cos(dPsi + this.sigma) + Math.PI)) + 1);
@@ -110,6 +109,7 @@
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
+            	return 1;
                 return ((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi));
             },
@@ -128,7 +128,6 @@
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]),
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
-                //console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
                 return dist * win * rep;
             },
 
@@ -157,7 +156,6 @@
                     dm = ob[0];
                     psi = ob[1];
                     dPsi = ob[2];
-
                     Di = this.distanceFunc(dm);
                     Wi = this.windowFunc(phi, psi, dPsi);
                     Ri = this.repellerFunc(phi, psi, dPsi);
@@ -193,7 +191,8 @@
                 return this.a * Math.sin(phi - psiTar);
             },
 
-            /* Gets the weight of a target and a repeller*/
+            /* Gets the weight of a target and a repeller.
+             * returns in the form [weight of targer, weight of obstacle]*/
             getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
@@ -230,9 +229,11 @@
 						return prev + curr;
 					});
 				}
-                //console.log(Math.abs(agent.weights[1]) * fObs + "\t" + Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar));
-                return (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
-                    (Math.abs(agent.weights[1]) * fObs) + 0.01*(Math.random()-0.5);
+				weightedObs = (Math.abs(agent.weights[1]) * fObs) % (Math.PI * 2);
+				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
+                    weightedObs + 0.01*(Math.random()-0.5);
+				//console.log(phiDot + "\t" + (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + "\t" + (Math.abs(agent.weights[1] * fObs)));
+                return phiDot;
             },
 
             /* Perceive objects */
@@ -250,6 +251,7 @@
                 this.envObs.map(function(elem){
                     if(elem !== agent){
                         dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
+                        //console.log(dm);
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
                         psi = (Math.PI * 2 + psi) % (Math.PI * 2);
@@ -272,8 +274,25 @@
                 this.world.obstacles.map(function(elem){
                     if(elem.type !== "wall") {
                         this.envObs.push(new Circle(elem.position, elem.size));
-                    } else {
-                        // We're looking at a wall so TODO: Convert a wall to a bunch of circles.
+                    } 
+                    else {
+                    	var height = elem.height,
+                    		width = elem.width;
+                        if (height > width) {
+                        	for (var i = 0; i < height/width; i += 1) {
+                        		this.envObs.push(new Circle(
+                        		$V([elem.position.e(1) + width/2, 
+                        		elem.position.e(2) + i * width + width/2]),
+                        		width/2));
+                        	}
+                        }
+                        else {
+                        	for (var i = 0; i < width/height; i += 1) {
+                        		this.envObs.push(new Circle(
+                        		$V([elem.position.e(1) + i * height + height/2, 
+                        		elem.position.e(2) + height/2]), height/2));
+                        	}
+                        }
                     }
                 }, this);
             },
@@ -285,17 +304,18 @@
                  * is dependent on the old heading*/
                 if (agent.target !== null) {
                     this.updateRepresentation(agent);
+                    console.log(this.envObs);
                     var perceivedObs = this.sense(agent),
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,
                         oldHeading = agent.heading,
-                        xd = 50 *Math.cos(agent.heading),
+                        xd = 50 * Math.cos(agent.heading),
                         yd = 50 * Math.sin(agent.heading);
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
 
-                    agent.heading = newHeading;
+                    agent.heading = (newHeading + 2 * Math.PI) % (2 * Math.PI);
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= 20){
                         agent.target = null;

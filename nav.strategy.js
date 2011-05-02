@@ -90,7 +90,6 @@
              * In Juan Pablo's code, this is D
              */
             distanceFunc: function(dm) {
-            	//console.log(dm + "\t" + dm/this.d0 + "\t" + Math.exp(-1 * (dm/this.d0)));
                 return Math.exp(-1 * (dm/this.d0));
             },
 
@@ -108,7 +107,7 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
-                var phiPsi = Math.cos(phi - psi+Math.PI);
+                var phiPsi = Math.cos(phi - psi + Math.PI);
                 var dPsiSigma = Math.cos(dPsi + this.sigma);
                 var tan = Math.tanh(this.h1 * (phiPsi - dPsiSigma)) + 1;
                 return 0.5*(tan);
@@ -118,8 +117,6 @@
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
-                //console.log(((phi - psi)/dPsi) *
-                //    Math.exp(1 - Math.abs((phi - psi)/dPsi)));
                 return ((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi));
                 //return 1;
@@ -260,7 +257,6 @@
                 this.envObs.map(function(elem){
                     if(elem !== agent){
                         dm = pos.distanceFrom(elem.center) - elem.radius - agSize;
-                        //console.log(dm);
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
                         psi = (Math.PI * 2 + psi);
@@ -327,7 +323,6 @@
                  * is dependent on the old heading*/
                 if (agent.target !== null) {
                     this.updateRepresentation(agent);
-//                    console.log(this.envObs);
                     var perceivedObs = this.sense(agent),
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,
@@ -340,7 +335,7 @@
 
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
-                    if(agent.position.distanceFrom(agent.target) <= 20){
+                    if(agent.position.distanceFrom(agent.target) <= (agent.size + 10)){
                         agent.target = null;
                     }
                 }

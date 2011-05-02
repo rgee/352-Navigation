@@ -61,7 +61,7 @@ $(document).ready(function(){
                 this.noFill();
                 this.stroke(255,255,255);
                 nav.dynamical.envObs.forEach(function(elem){
-                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius, elem.radius);
                 },this);
                 this.stroke(0,0,0);
                 this.fill();
@@ -105,12 +105,12 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size, agent.size);
             
             //draw target
             if(agent.target !== null) {
                 this.fill(100, 255, 65);
-                this.ellipse(agent.target.e(1), agent.target.e(2), 20, 20);
+                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
             }
         };
 
@@ -147,11 +147,10 @@ $(document).ready(function(){
                 this.line(obstacle.endPoints[0].e(1), obstacle.endPoints[0].e(2), obstacle.endPoints[1].e(1), obstacle.endPoints[1].e(2));
                 this.strokeWeight(1);
             }else{
-                this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, 10);
+                this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
             }
         };
     };
 
 	var proc = new Processing(document.getElementById('display'), draw);
-	/*proc.size(800,600);*/
 });

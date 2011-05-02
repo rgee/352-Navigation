@@ -5,13 +5,19 @@ $(document).ready(function(){
         world.obstacles = [];
 
     world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
-    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
-    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
-    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
 
     world.agents[0].target = ($V([400, 200]));
+    
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
+    world.addExt($V([400,50]), 'n');
+    world.addExt($V([400,750]), 's');
+    world.addExt($V([750,300]), 'e');
+    world.addExt($V([50,300]), 'w');
+
 
     var nav = new Nav(world);
     

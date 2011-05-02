@@ -3,6 +3,8 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
+    world.addAgent(new Nav.Agent($V([400,300]), $V([50,50]), 5, false));
+    /*
     var i=0;
     while(i<10){
         var x = Math.random()*800;
@@ -11,9 +13,9 @@ $(document).ready(function(){
         if(x>=745){ x-=100;}
         if(y<=55){ y+=100;}
         if(y>=545){ y-=100;}
-        world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, true));
+        world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, false));
         i++;
-    }
+    }*/
 
     world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addWall($V([350,200]), 100, 'h');
@@ -79,6 +81,7 @@ $(document).ready(function(){
             var target = $V([this.mouseX, this.mouseY]);
             switch(this.mouseButton){
                 case 37:
+                    console.log(target.inspect() + ' maps to: ' + nav.aStar.grid.toGridSpace(target).inspect());
                     nav.world.agents.map(function(elem){
                         elem.target = target; 
                         elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
@@ -116,8 +119,12 @@ $(document).ready(function(){
             
             //draw target
             if(agent.target !== null) {
+                var pos = agent.target;
+                if(agent.strategy === "A*"){
+                    pos = nav.aStar.grid.toGridSpace(agent.target);
+                }
                 this.fill(100, 255, 65);
-                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
+                this.ellipse(pos.e(1) * nav.aStar.grid.cellSize, pos.e(2) * nav.aStar.grid.cellSize, 10, 10);
             }
         };
 

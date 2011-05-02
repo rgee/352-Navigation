@@ -467,8 +467,8 @@
                 return Vector.create( [(col * this.cellSize) + this.cellSize / 2, (row * this.cellSize) + this.cellSize/2] );
             },
             toGridSpace: function(pos){
-                return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
-                                       Math.floor(((this.nRows -1) * (pos.e(2) / this.yMax)))] );
+                return Vector.create( [Math.floor(((this.nCols) * (pos.e(1) / this.xMax))),
+                                       Math.floor(((this.nRows) * (pos.e(2) / this.yMax)))] );
             }
         };
 
@@ -670,7 +670,8 @@
 			execute: function(agent){
                 this.updateRepresentation();
                 if(agent.target !== null){
-                    if(!this.pathInvalid(this.pathHash[agent.id], agent)){
+                    //if(!this.pathInvalid(this.pathHash[agent.id], agent)){
+                    if(this.pathHash[agent.id]){
                         this.getNextTarget(agent);
                     } else {
             			var gridSpacePos = this.grid.toGridSpace(agent.position),

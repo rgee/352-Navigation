@@ -4,6 +4,7 @@ $(document).ready(function(){
         world.obstacles = [];
 
     world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, true));
     world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
     world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
     world.addAgent(new Nav.Agent($V([400,75]), $V([50,50]), 5, true));
@@ -23,7 +24,7 @@ $(document).ready(function(){
     world.addWall($V([600,300]), 300, 'h');
     world.addWall($V([500,500]), 100, 'v');
     world.agents.map(function(elem){
-        target = $V([700,500]);
+        target = $V([745,500]);
         elem.target = target; 
         elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
     });

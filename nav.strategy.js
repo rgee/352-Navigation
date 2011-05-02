@@ -43,16 +43,16 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 25;
+            this.d0 = 30;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.0;
+            this.a = 3.3;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
-            this.aTar = 0.4;
+            this.aTar = 0.3;
             //advantage of going to target over obstacle
-            this.gTarObs = 0.005;
+            this.gTarObs = 0.05;
             this.timestep = 0.05;
 		}
 

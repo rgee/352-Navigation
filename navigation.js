@@ -6,7 +6,7 @@ $(document).ready(function(){
 
     
     var i=0;
-    while(i<10){
+    while(i<2){
         var x = Math.random()*800;
         var y = Math.random()*600;
         if(x<=55){ x+=100;}
@@ -16,8 +16,8 @@ $(document).ready(function(){
         world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, true));
         i++;
     }
-    
-    
+
+
     world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addWall($V([350,200]), 100, 'h');
     world.addExt($V([399,50]), 800, 'n');
@@ -28,12 +28,11 @@ $(document).ready(function(){
 
 
     var nav = new Nav(world);
-    
+
     var draw = function (proc){
         proc.setup = function() {
             proc.frameRate(60);
             proc.size(800,600);
-
         };
         proc.draw = function(){
             this.background(20);
@@ -47,7 +46,7 @@ $(document).ready(function(){
                 nav.world.obstacles.map(this.drawObstacle, this);   
             }
         };
-        
+
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
             if (nav.world.agents[0].strategy === "A*") {

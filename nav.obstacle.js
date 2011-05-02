@@ -7,9 +7,12 @@
 	}
 	Obstacle.prototype ={   
         update: function(){
-            if (Math.random()<10/this.size){
+/*            if (Math.random()<10/this.size){
                 this.size *= 1.01;
             }
+*/
+            this.size *= 1.001
+            this.size += 2/this.size
         }
     };
 

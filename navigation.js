@@ -2,15 +2,22 @@ $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];
         world.obstacles = [];
-    world.addAgent(new Nav.Agent($V([400,600]), $V([50,50]), 10, true));
+
+
+    world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
+//    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
 
     world.agents[0].target = ($V([400, 200]));
+    
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
-    world.addWall($V([105,295]), 380, 'v');
-    world.addWall($V([400,100]), 600, 'h');
-    world.addWall($V([695,295]), 380, 'v');
-    world.addWall($V([400,490]), 600, 'h');
+    world.addExt($V([400,50]), 'n');
+    world.addExt($V([400,750]), 's');
+    world.addExt($V([750,300]), 'e');
+    world.addExt($V([50,300]), 'w');
+
 
     var nav = new Nav(world);
     
@@ -27,7 +34,6 @@ $(document).ready(function(){
 
             if(nav.debug){
                 this.drawDebugInfo();
-                
             } else {
                 nav.world.obstacles.map(this.drawObstacle, this);   
             }
@@ -35,7 +41,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy== "dynamical") {
+            if (nav.world.agents[0].strategy === "A*") {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -54,7 +60,13 @@ $(document).ready(function(){
             }
             //Dynamical systems
             else {
-
+                this.noFill();
+                this.stroke(255,255,255);
+                nav.dynamical.envObs.forEach(function(elem){
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                },this);
+                this.stroke(0,0,0);
+                this.fill();
             }
         };
         

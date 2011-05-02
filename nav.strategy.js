@@ -31,10 +31,10 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 20;
+            this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.0;
+            this.a = 5.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -108,9 +108,9 @@
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
-            	return 1;
-                return ((phi - psi)/dPsi) *
-                    Math.exp(1 - Math.abs((phi - psi)/dPsi));
+                return 1;
+                //return ((phi - psi)/dPsi) *
+                //    Math.exp(1 - Math.abs((phi - psi)/dPsi));
             },
             
             /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -127,7 +127,6 @@
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]),
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
-                //console.log(dist + "\t" + win +"\t" + rep + "\t" + dist * win * rep);
                 return dist * win * rep;
             },
 

@@ -3,7 +3,7 @@ $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];
         world.obstacles = [];
-    world.addAgent(new Nav.Agent($V([400,600]), $V([50,50]), 10));
+    world.addAgent(new Nav.Agent($V([400,600]), $V([50,50]), 10, true));
     world.agents[0].target = ($V([400, 200]));
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
@@ -71,8 +71,8 @@ $(document).ready(function(){
                     */
                     break;
                 case 39:
-                    //nav.world.addWall(target, 100, 'h');
-                    nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
+                    nav.world.addWall(target, 100, 'h');
+                    //nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
                     /*
                     var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
                     newAgent.health = Math.random();
@@ -94,11 +94,12 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), 10, 10);
-            this.fill(255,255,255);
+            this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+            
             //draw target
             if(agent.target !== null) {
-                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
+                this.fill(100, 255, 65);
+                this.ellipse(agent.target.e(1), agent.target.e(2), 20, 20);
             }
         };
 

@@ -297,10 +297,7 @@
 
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
-                    if (agent.position.e(1) >= agent.target.e(1) - 10 && 
-                        agent.position.e(1) < agent.target.e(1) + 10 &&
-                        agent.position.e(2) >= agent.target.e(2) - 10 &&
-                        agent.position.e(2) < agent.target.e(2) + 10) {
+                    if(agent.position.distanceFrom(agent.target) <= 20){
                         agent.target = null;
                     }
                 }

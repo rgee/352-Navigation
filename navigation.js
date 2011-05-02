@@ -3,8 +3,7 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
-    world.addAgent(new Nav.Agent($V([400,300]), $V([50,50]), 5, false));
-    /*
+    
     var i=0;
     while(i<10){
         var x = Math.random()*800;
@@ -13,9 +12,9 @@ $(document).ready(function(){
         if(x>=745){ x-=100;}
         if(y<=55){ y+=100;}
         if(y>=545){ y-=100;}
-        world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, false));
+        world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, true));
         i++;
-    }*/
+    }
 
     world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addWall($V([350,200]), 100, 'h');
@@ -32,6 +31,7 @@ $(document).ready(function(){
         proc.setup = function() {
             proc.frameRate(60);
             proc.size(800,600);
+
         };
         proc.draw = function(){
             this.background(20);
@@ -69,6 +69,7 @@ $(document).ready(function(){
             else {
                 this.noFill();
                 this.stroke(255,255,255);
+                this.ellipseMode(3);
                 nav.dynamical.envObs.forEach(function(elem){
                     this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
                 },this);
@@ -114,15 +115,18 @@ $(document).ready(function(){
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
+            this.ellipseMode(0);
             this.fill(255, agent.health*255 ,agent.health*255 );
             this.ellipse(agent.position.e(1), agent.position.e(2), agent.size*2, agent.size*2);
             
             //draw target
             if(agent.target !== null) {
+                
                 var pos = agent.target;
                 if(agent.strategy === "A*"){
                     pos = nav.aStar.grid.toGridSpace(agent.target);
                 }
+                this.ellipseMode(0);
                 this.fill(100, 255, 65);
                 this.ellipse(pos.e(1) * nav.aStar.grid.cellSize, pos.e(2) * nav.aStar.grid.cellSize, 10, 10);
             }
@@ -143,7 +147,7 @@ $(document).ready(function(){
             for(node; node < numNodes; node++){
                 x = path[node].e(1);
                 y = path[node].e(2);    
-
+                this.ellipseMode(0);
                 this.ellipse(x, y, width, height);
                 
                 if(node + 1 < numNodes) {

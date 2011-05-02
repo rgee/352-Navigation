@@ -623,7 +623,7 @@
                 
             },
             pathInvalid: function(path, agent){
-                if(!path || path.length === 0){
+                if(!path){
                     return true;    
                 }
  
@@ -648,13 +648,14 @@
             // Returns the next intermediate target an agent needs to reach its goal.
             getNextTarget: function(agent){
                 var gridPos = this.grid.toGridSpace(agent.position),
-                    path = this.pathHash[agent.id],
+                    path = this.pathHash[agent.id].path,
                     currentTarget = agent.interTarget;
                 if(agent.interTarget){
                     var currentTargetGrid = this.grid.toGridSpace(currentTarget);
-                    if(gridPos.eql(currentTargetGrid)){
+                    if(agent.position.distanceFrom(currentTarget) <= 1.0){
                         if(path.length === 0){
                             agent.interTarget = null;
+                            agent.target = null;
                             this.pathHash[agent.id] = null;
                         } else {
                             agent.interTarget = path.shift();
@@ -670,8 +671,9 @@
 			execute: function(agent){
                 this.updateRepresentation();
                 if(agent.target !== null){
-                    //if(!this.pathInvalid(this.pathHash[agent.id], agent)){
-                    if(this.pathHash[agent.id]){
+                    if( this.pathHash[agent.id] &&
+                        !this.pathInvalid(this.pathHash[agent.id].path, agent) &&
+                        this.pathHash[agent.id].goal.eql(agent.target)){
                         this.getNextTarget(agent);
                     } else {
             			var gridSpacePos = this.grid.toGridSpace(agent.position),
@@ -682,8 +684,11 @@
             			    heuristic = straightLineDist,
             			    result = heuristicSearch(initial, goal, fringe, heuristic);
                         if(result !== null){
-                            this.pathHash[agent.id] = this.toPath(result, agent);
-            			    agent.path = this.pathHash[agent.id];
+                            this.pathHash[agent.id] = {
+                                                       path:this.toPath(result, agent),
+                                                       goal:agent.target
+                                                      };
+            			    agent.path = this.pathHash[agent.id].path;
                         }
                     }
                 }

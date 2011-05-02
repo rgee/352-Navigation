@@ -4,9 +4,9 @@ $(document).ready(function(){
         world.obstacles = [];
     //world.addAgent(new Nav.Agent($V([400,300]), $V([50,50]), 5, false));
 
-    
+
     var i=0;
-    while(i<2){
+    /*while(i<1){
         var x = Math.random()*800;
         var y = Math.random()*600;
         if(x<=55){ x+=100;}
@@ -15,17 +15,28 @@ $(document).ready(function(){
         if(y>=545){ y-=100;}
         world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, true));
         i++;
-    }
-
-
-    world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
-    world.addWall($V([350,200]), 100, 'h');
+    };
+*/
+    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([400,75]), $V([50,50]), 5, true));
+    //top left is 50,50; bottom right is 750,550
+    //world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addExt($V([399,50]), 800, 'n');
     world.addExt($V([399,550]), 800, 's');
     world.addExt($V([750,300]), 600, 'e');
     world.addExt($V([50,300]), 600, 'w');
     world.addFire($V([50,50]));
-
+    world.addWall($V([100,200]), 100, 'h');
+    world.addWall($V([150,75]), 50, 'v');
+    world.addWall($V([300,150]), 200, 'v');
+    world.addWall($V([200,400]), 300, 'v');
+    world.addWall($V([700,450]), 100, 'h');
+    world.addWall($V([500,100]), 100, 'v');
+    world.addWall($V([500,150]), 200, 'h');
+    world.addWall($V([600,300]), 300, 'h');
+    world.addWall($V([500,500]), 100, 'v');
 
     var nav = new Nav(world);
 

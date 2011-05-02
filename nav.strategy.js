@@ -43,7 +43,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 100;
+            this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
             this.a = 3.0;

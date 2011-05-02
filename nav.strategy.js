@@ -405,6 +405,37 @@
                                 break;
                         }
                         break;
+                    case 'fire':
+                        // Approximate a circle on the grid by using the circumscribing square.
+                        var topLeft = $V([obs.position.e(1) - obs.size/2, obs.position.e(2) - obs.size/2]),
+                            bottomRight = $V([obs.position.e(1) + obs.size/2, obs.position.e(2) + obs.size/2]),
+                            gridSpace;
+                            
+                            for(var i = topLeft.e(1); i < topLeft.e(1) + obs.size; i += this.cellSize){
+                                if(this.isInWorldWS(i, topLeft.e(2))){
+                                    gridSpace = this.toGridSpace($V([i, topLeft.e(2)]));
+                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
+                                }
+                            }
+                            for(i = topLeft.e(2); i < topLeft.e(2) + obs.size; i += this.cellSize){
+                                if(this.isInWorldWS(i,topLeft.e(1))){
+                                    gridSpace = this.toGridSpace($V([topLeft.e(1), i]));
+                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;    
+                                }
+                            }
+                            for(var j = bottomRight.e(1); j > bottomRight.e(1) - obs.size; j -= this.cellSize){
+                                if(this.isInWorldWS(j, bottomRight.e(2))){
+                                    gridSpace = this.toGridSpace($V([j, bottomRight.e(2)]));
+                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
+                                }
+                            }
+                            for(j = bottomRight.e(2); j > bottomRight.e(2) - obs.size; j -= this.cellSize){
+                                if(this.isInWorldWS(bottomRight.e(1), j)){
+                                    gridSpace = this.toGridSpace($V([bottomRight.e(1), j]));
+                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;    
+                                }
+                            }
+                        break;
                     default:
                         break;
                 }
@@ -456,7 +487,9 @@
             isInWorld: function(col, row) {
                 return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
-            
+            isInWorldWS: function(x, y) {
+                return (x >= 0 && x < this.xMax) && (y >= 0 && y < this.yMax);
+            },
             
             // Takes a row and column and returns an array of valid (row,col) pairs
             // if they are on the world grid.

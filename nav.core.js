@@ -20,7 +20,7 @@
                 agents[i].act();
             }
             this.world.obstacles.map(function(e){
-                e.update(); 
+                if (e.type === "fire"){e.update();}
             });
         }
            

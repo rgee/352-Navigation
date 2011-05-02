@@ -29,6 +29,10 @@
             obj = (new Nav.Obstacle('exterior', pos, length));
             obj.direction = direction;
             this.obstacles.push(obj);
+        },
+
+        addFire: function(pos) {
+            this.obstacles.push(new Nav.Obstacle('fire', pos, 5));
         }
     }
             

@@ -52,7 +52,7 @@
             //advantage of going towards target
             this.aTar = 0.4;
             //advantage of going to target over obstacle
-            this.gTarObs = 0.05;
+            this.gTarObs = 0.005;
             this.timestep = 0.05;
 		}
 
@@ -117,9 +117,8 @@
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
-                return ((phi - psi)/dPsi) *
-                    Math.exp(1 - Math.abs((phi - psi)/dPsi));
-                //return 1;
+                return this.signum(((phi - psi)/dPsi) *
+                    Math.exp(1 - Math.abs((phi - psi)/dPsi)));
             },
             
             /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -134,8 +133,9 @@
              */
             fullRepellerFunc: function(phi, obs) {
                 var dist = this.distanceFunc(obs[0]),
-                    win = this.windowFunc(phi, obs[1], obs[2]),
+                    win = this.windowFunc(phi, obs[1], obs[2]);
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
+                    console.log(rep);
                 return dist * win * rep;
             },
 
@@ -194,7 +194,6 @@
              * In Juan Pablo's code, this is fTar.
              */
             defAttractor: function(phi, psiTar) {
-
                 return this.a * Math.sin(phi - psiTar);
             },
 
@@ -306,11 +305,16 @@
                         case "block":
                             obsCirc=new Circle(elem.position, elem.size);
                             break;
+                        case "fire":
+                            obsCirc=new Circle(elem.position, elem.size);
+                            break;
                     }
                     dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                     if(dm<0){
-                        //collision(agent, elem);
-                        agent.heading = (agent.heading+Math.PI)%(Math.PI*2);
+                        collision(agent, elem);
+                        agent.heading = (agent.heading+Math.PI);
+                        while(agent.heading>Math.PI){ agent.heading -= 2*Math.PI}
+                        while(agent.heading<-Math.PI){ agent.heading += 2*Math.PI}
                     }
                     this.envObs.push(obsCirc);
                 }, this);

@@ -31,8 +31,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 25;
-
+            this.d0 = 100;
             this.c1 = 2.0;
             this.c2 = 2.0;
             this.a = 5.0;
@@ -271,27 +270,26 @@
                 }, this);
 
                 this.world.obstacles.map(function(elem){
-                    if(elem.type !== "wall") {
-                        this.envObs.push(new Circle(elem.position, elem.size));
-                    } 
-                    else {
-                    	var height = elem.height,
-                    		width = elem.width;
-                        if (height > width) {
-                        	for (var i = 0; i < height/width; i += 1) {
-                        		this.envObs.push(new Circle(
-                        		$V([elem.position.e(1) + width/2, 
-                        		elem.position.e(2) + i * width + width/2]),
-                        		width/2));
-                        	}
-                        }
-                        else {
-                        	for (var i = 0; i < width/height; i += 1) {
-                        		this.envObs.push(new Circle(
-                        		$V([elem.position.e(1) + i * height + height/2, 
-                        		elem.position.e(2) + height/2]), height/2));
-                        	}
-                        }
+                    switch(elem.type) {
+                        case "exterior":
+                            switch(elem.direction){
+                                case 'n':
+                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)-100000]), 100000));
+                                    break;
+                                case 's':
+                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)+100000]), 100000));
+                                    break;
+                                case 'e':
+                                    this.envObs.push(new Circle($V([elem.position.e(1)+100000, elem.position.e(2)]), 100000));
+                                    break;
+                                case 'w':
+                                    this.envObs.push(new Circle($V([elem.position.e(1)-100000, elem.position.e(2)]), 100000));
+                                    break;
+                            }
+                            break;
+                        case "block":
+                            this.envObs.push(new Circle(elem.position, elem.size));
+                            break;
                     }
                 }, this);
             },
@@ -303,7 +301,7 @@
                  * is dependent on the old heading*/
                 if (agent.target !== null) {
                     this.updateRepresentation(agent);
-                    console.log(this.envObs);
+//                    console.log(this.envObs);
                     var perceivedObs = this.sense(agent),
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,

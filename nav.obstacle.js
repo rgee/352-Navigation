@@ -1,6 +1,6 @@
 (function(){
 	/* An obstacle in the world. */
-	function Obstacle(type, position, height, width) {
+	function Obstacle(type, position, size) {
         this.type = type;
 		this.position = position;
         this.size = size;

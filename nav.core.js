@@ -17,9 +17,10 @@
                     // Do DS
                     this.dynamical.execute(agents[i]);
                 }
-
-
             }
+            this.world.agents = this.world.agents.filter(function(e){
+                return !e.escaped;
+            });
             this.world.obstacles.map(function(e){
                 if (e.type === "fire"){e.update();}
             });

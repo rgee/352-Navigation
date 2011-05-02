@@ -4,6 +4,7 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
+
     world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
 //    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
@@ -34,7 +35,6 @@ $(document).ready(function(){
 
             if(nav.debug){
                 this.drawDebugInfo();
-                
             } else {
                 nav.world.obstacles.map(this.drawObstacle, this);   
             }
@@ -42,7 +42,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy== "A*") {
+            if (nav.world.agents[0].strategy === "A*") {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -61,7 +61,13 @@ $(document).ready(function(){
             }
             //Dynamical systems
             else {
-
+                this.noFill();
+                this.stroke(255,255,255);
+                nav.dynamical.envObs.forEach(function(elem){
+                    this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                },this);
+                this.stroke(0,0,0);
+                this.fill();
             }
         };
         
@@ -102,11 +108,12 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), 10, 10);
-            this.fill(255,255,255);
+            this.ellipse(agent.position.e(1), agent.position.e(2), 20, 20);
+            
             //draw target
             if(agent.target !== null) {
-                this.ellipse(agent.target.e(1), agent.target.e(2), 10, 10);
+                this.fill(100, 255, 65);
+                this.ellipse(agent.target.e(1), agent.target.e(2), 20, 20);
             }
         };
 

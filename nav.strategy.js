@@ -129,7 +129,7 @@
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]),
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
-                console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
+                //console.log(dist + "\t" + win + "\t" + rep + "\t" + dist * win * rep);
                 return dist * win * rep;
             },
 
@@ -298,10 +298,7 @@
 
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
-                    if (agent.position.e(1) >= agent.target.e(1) - 10 && 
-                        agent.position.e(1) < agent.target.e(1) + 10 &&
-                        agent.position.e(2) >= agent.target.e(2) - 10 &&
-                        agent.position.e(2) < agent.target.e(2) + 10) {
+                    if(agent.position.distanceFrom(agent.target) <= 20){
                         agent.target = null;
                     }
                 }
@@ -499,7 +496,6 @@
 			while(!fringe.isEmpty()){
 				current = fringe.pop();
 				if(current.state.equals(goalState)){
-					console.log("Found Solution");
 					return current;
 				}
 				else if(!closedStates.contains(current.state)){
@@ -513,12 +509,10 @@
 							fringe.push(new_nodes[i]);
 						}
 					} else {
-						console.log("too many nodes");
 						return null;
 					}
 				}
 			}
-			console.log("Solution not found.");
 			return null;
 		}
 
@@ -587,22 +581,24 @@
                 
                 
             },
-            pathInvalid: function(path){
+            pathInvalid: function(path, agent){
                 if(!path || path.length === 0){
                     return true;    
                 }
+ 
                 // We only care about obstructions along the first maxDistance nodes of the path
                 // since looking only so far ahead means there's a higher chance a further obstruction
                 // will be the fault of a dynamic object, so it will have moved away by the time we reach
                 // it.
-                var maxDistance = 4,
+                var maxDistance = 2,
+                    agentCell = this.grid.toGridSpace(agent.position),
                     node;
                     
                 maxDistance = (path.length < maxDistance ? path.length : maxDistance);
                 for(var i = 0; i < maxDistance; i++){
                     node = this.grid.toGridSpace(path[i]);
-                    if(this.grid.data[node.e(1)][node.e(2)] === 1){
-                        console.log(node.inspect() + ' is blocked');
+                    if(this.grid.data[node.e(1)][node.e(2)] === 1 &&
+                       !node.eql(agentCell)){
                         return true;    
                     }
                 }
@@ -621,6 +617,9 @@
                             this.pathHash[agent.id] = null;
                         } else {
                             agent.interTarget = path.shift();
+                            while(gridPos.eql(agent.interTarget)){
+                                agent.interTarget = path.shift();   
+                            }
                         }
                     }
                 } else {
@@ -630,7 +629,7 @@
 			execute: function(agent){
                 this.updateRepresentation();
                 if(agent.target !== null){
-                    if(!this.pathInvalid(this.pathHash[agent.id])){
+                    if(!this.pathInvalid(this.pathHash[agent.id], agent)){
                         this.getNextTarget(agent);
                     } else {
             			var gridSpacePos = this.grid.toGridSpace(agent.position),

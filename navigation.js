@@ -4,8 +4,8 @@ $(document).ready(function(){
         world.obstacles = [];
 
     world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, false));
     world.addAgent(new Nav.Agent($V([400,75]), $V([50,50]), 5, true));
     //top left is 50,50; bottom right is 750,550
     world.addExt($V([399,50]), 800, 'n');
@@ -106,7 +106,7 @@ $(document).ready(function(){
             }
             this.ellipseMode(0);
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size*2, agent.size*2);
+            this.ellipse(agent.position.e(1) - 5, agent.position.e(2) - 5, agent.size*2, agent.size*2);
             
             if(agent.target !== null) {
                 
@@ -120,11 +120,7 @@ $(document).ready(function(){
             }
         };
 
-        /**
-         * Visualize a path in a grid.
-         *
-         * Input: A path (list of vectors), a grid (you know what this is...)
-         */ 
+        //Visualize a path in a grid.
         proc.drawPath = function(path, grid) {
            var node = 0,
                numNodes = path.length,
@@ -136,7 +132,7 @@ $(document).ready(function(){
                 x = path[node].e(1);
                 y = path[node].e(2);    
                 this.ellipseMode(0);
-                this.ellipse(x, y, width, height);
+                this.ellipse(x-5, y-5, width, height);
                 
                 if(node + 1 < numNodes) {
                     nextX = path[node+1].e(1);
@@ -147,13 +143,31 @@ $(document).ready(function(){
         };
 
         proc.drawObstacle = function(obstacle) {
-            if(obstacle.type === 'wall'){
-                this.stroke(255,255,255);
-                this.strokeWeight(10);
-                this.line(obstacle.endPoints[0].e(1), obstacle.endPoints[0].e(2), obstacle.endPoints[1].e(1), obstacle.endPoints[1].e(2));
-                this.strokeWeight(1);
-            }else{
-                this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
+            switch(obstacle.type){
+                case 'exterior':
+                    this.rectMode(3);
+                    this.noStroke();
+                    this.fill(255,255,255);
+                    if(obstacle.direction == 'n' || obstacle.direction == 's'){
+                        this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, 10);
+                    } else {
+                        this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, obstacle.size);   
+                    }
+                    this.stroke(0,0,0);
+                    break;
+                case 'block':
+                    this.noStroke();
+                    this.fill(255,255,255);
+                    this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
+                    break;
+                case 'fire':
+                    this.noFill();
+                    this.ellipseMode(3);
+                    this.stroke(247, 115, 7);
+                    this.ellipse(obstacle.position.e(1), obstacle.position.e(2), obstacle.size*2, obstacle.size*2);
+                    break;
+                default:
+                    break;
             }
         };
     };

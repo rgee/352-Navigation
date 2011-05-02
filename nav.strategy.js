@@ -31,10 +31,10 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 25;
+            this.d0 = 20;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3;
+            this.a = 3.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -341,6 +341,33 @@
 
                 this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
             },
+            // This function deals with objects overlapping grid boundaries
+            addObstacle: function(obs){
+                var gridSpacePos = this.toGridSpace(obs.position);
+                this.data[gridSpacePos.e(1)][gridSpacePos.e(2)] = 1;
+                switch(obs.type){
+                    case 'block':
+                        var eastEdgeExtent, westEdgeExtent, northEdgeExtent, southEdgeExtent;
+                        
+                        // Check if the east edge of this block is in another grid square.
+                        eastEdgeExtent = this.toGridSpace($V([obs.position.e(1) + obs.size, obs.position.e(2)]));
+                        if(eastEdgeExtent.e(1) > gridSpacePos.e(1) &&
+                           this.isInWorld(eastEdgeExtent.e(1), eastEdgeExtent.e(2))){
+                            this.data[eastEdgeExtent.e(1)][eastEdgeExtent.e(2)] = 1;    
+                        }
+                        
+                        // Check if the west edge of this block is in another grid square.
+                        westEdgeExtent = this.toGridSpace($V([obs.position.e(1) - obs.size, obs.position.e(2)]));
+                        if(westEdgeExtent.e(1) < gridSpacePos.e(1) &&
+                           this.isInWorld(westEdgeExtent.e(1), westEdgeExtent.e(1))){
+                            this.data[westEdgeExtent.e(1)][westEdgeExtent.e(2)] = 1;       
+                        }
+                        
+                        break;
+                    default:
+                        break;
+                }
+            },
             clear: function(){
                 this.data = new Grid(this.nCols, this.nRows);    
             },
@@ -356,6 +383,7 @@
             isInWorld: function(col, row) {
                 return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
+            
             
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
@@ -514,6 +542,14 @@
             // Create the world grid here
             this.grid = new WorldGrid(10,800,600);
             this.updateRepresentation();
+            
+            // Map from agent ids to path arrays.
+            // Needed so we can verify the validity of paths against the /grid/, 
+            // which agents themselves have nor should have access to. Now when an agent
+            // calls execute, the A* module will first check if that agent's path is valid
+            // then if it is, return the node the agent should be heading to currently. If not
+            // it will recompute the path and store it here.
+            this.pathHash = {};
 		}
 		AStar.prototype = {
             /**
@@ -539,25 +575,74 @@
 			},
             updateRepresentation: function(){
                 this.grid.clear();
+                
                 this.world.agents.map(function(elem){
                     this.grid.addObject(elem.position);
                 }, this);
                 this.world.obstacles.map(function(elem){
-                    this.grid.addObject(elem.position); //the position was added as a hack
+                    
+                    this.grid.addObstacle(elem);
                 },this);
+                
+                
+            },
+            pathInvalid: function(path){
+                if(!path || path.length === 0){
+                    return true;    
+                }
+                // We only care about obstructions along the first maxDistance nodes of the path
+                // since looking only so far ahead means there's a higher chance a further obstruction
+                // will be the fault of a dynamic object, so it will have moved away by the time we reach
+                // it.
+                var maxDistance = 4,
+                    node;
+                    
+                maxDistance = (path.length < maxDistance ? path.length : maxDistance);
+                for(var i = 0; i < maxDistance; i++){
+                    node = this.grid.toGridSpace(path[i]);
+                    if(this.grid.data[node.e(1)][node.e(2)] === 1){
+                        console.log(node.inspect() + ' is blocked');
+                        return true;    
+                    }
+                }
+                return false;
+            },
+            // Returns the next intermediate target an agent needs to reach its goal.
+            getNextTarget: function(agent){
+                var gridPos = this.grid.toGridSpace(agent.position),
+                    path = this.pathHash[agent.id],
+                    currentTarget = agent.interTarget;
+                if(agent.interTarget){
+                    var currentTargetGrid = this.grid.toGridSpace(currentTarget);
+                    if(gridPos.eql(currentTargetGrid)){
+                        if(path.length === 0){
+                            agent.interTarget = null;
+                            this.pathHash[agent.id] = null;
+                        } else {
+                            agent.interTarget = path.shift();
+                        }
+                    }
+                } else {
+                    agent.interTarget = (path.length === 0 ? null : path.shift());
+                }
             },
 			execute: function(agent){
+                this.updateRepresentation();
                 if(agent.target !== null){
-                    this.updateRepresentation();
-        			var gridSpacePos = this.grid.toGridSpace(agent.position),
-        			    gridSpaceTar = this.grid.toGridSpace(agent.target),
-        			    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
-        			    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
-        			    fringe = new BinHeap(function(node){ return (node.h + node.g); }),
-        			    heuristic = straightLineDist,
-        			    result = heuristicSearch(initial, goal, fringe, heuristic);
-                    if(result !== null){
-        			    agent.path = this.toPath(result, agent);
+                    if(!this.pathInvalid(this.pathHash[agent.id])){
+                        this.getNextTarget(agent);
+                    } else {
+            			var gridSpacePos = this.grid.toGridSpace(agent.position),
+            			    gridSpaceTar = this.grid.toGridSpace(agent.target),
+            			    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+            			    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+            			    fringe = new BinHeap(function(node){ return (node.h + node.g); }),
+            			    heuristic = straightLineDist,
+            			    result = heuristicSearch(initial, goal, fringe, heuristic);
+                        if(result !== null){
+                            this.pathHash[agent.id] = this.toPath(result, agent);
+            			    agent.path = this.pathHash[agent.id];
+                        }
                     }
                 }
 			}

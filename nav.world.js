@@ -1,11 +1,11 @@
 (function(){
-    function World(agents, obstacles){
-        this.agents = agents;
-        this.obstacles = obstacles;
+    function World(){
+        this.maxId = -1;
     }
 
     World.prototype = {
         addAgent: function(agent) {
+            agent.id = ++this.maxId;
             this.agents.push(agent);
         },
         addObstacle: function(obs) {

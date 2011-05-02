@@ -8,6 +8,7 @@
 		this.speed = 2;
 		this.size = size;
         this.id = null;
+        this.escaped = false;
         this.alive = true;
         
         // [between 0 and 1]
@@ -60,6 +61,7 @@
         this.alive = true;
 		this.speed = 5;
 		this.size = size;
+        this.escaped = false;
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true

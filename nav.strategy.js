@@ -323,6 +323,7 @@
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= (agent.size+5)){
                         agent.target = null;
+                        agent.escaped = true;
                     }
                 }
 			}
@@ -694,6 +695,7 @@
                         if(path.length === 0){
                             agent.interTarget = null;
                             agent.target = null;
+                            agent.escaped = true;
                             this.pathHash[agent.id] = null;
                         } else {
                             agent.interTarget = path.shift();

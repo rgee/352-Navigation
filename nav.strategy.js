@@ -1,15 +1,15 @@
 (function(){
-	/* Strategies will maintain all internal state related to one agent's navigation. 
-	   For example, if an agent is using A* navigation, the A* strategy object keeps
-	   it's planned path. If an agent is using dynamical systems navigation, the 
-	   dynamical systems object keeps track of the agent's world representation. */
+	// Strategies will maintain all internal state related to one agent's navigation. 
+	// For example, if an agent is using A* navigation, the A* strategy object keeps
+    // it's planned path. If an agent is using dynamical systems navigation, the 
+	// dynamical systems object keeps track of the agent's world representation.
 	var Strategy = {};
 
 
-	/* Create closures for each strategy to encapsulate things like local
-	   classes that the strategies don't need to share */
+	// Create closures for each strategy to encapsulate things like local
+	// classes that the strategies don't need to share 
 	(function(strategyObj){
-        /* Extend the math object to add hyperbolic trigonometric functions */
+        // Extend the math object to add hyperbolic trigonometric functions 
         Math.sinh = function(x){
             return (Math.exp(x) - Math.exp(-x))/2;  
         };
@@ -38,7 +38,7 @@
                 
         }
         
-        /* Dynamical systems navigation strategy object */
+        // Dynamical systems navigation strategy object 
 		function Dynamical(world){
 			this.world = world;
             this.envObs = [];
@@ -58,13 +58,12 @@
 
         
 		Dynamical.prototype = {
-            /* Returns angle between an agent and a target*/
+            // Returns angle between an agent and a target
             computeAngle: function(aPos, tPos) {
                 return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
             },
-            /* Returns delta Psi, the angle between the internal tangents of 
-             * two circles.
-             */
+            // Returns delta Psi, the angle between the internal tangents of 
+            // two circles.
             subtendedAngle: function(agent, obs) {
                 var aPos=agent.center,
                      aRad=agent.radius,
@@ -79,21 +78,19 @@
                 return theta;
             },
 
-            /* Calculates attraction of a target.
-             * In Juan Pablo's code, this is fTar
-             */
+            // Calculates attraction of a target.
+            // In Juan Pablo's code, this is fTar
             calculateAttraction: function(phi, psiTar) {
                 return -this.a * Math.sin(phi - psiTar);
             },
 
-            /* Distance function. Adjusts force of repeller by distance.
-             * In Juan Pablo's code, this is D
-             */
+            // Distance function. Adjusts force of repeller by distance.
+            // In Juan Pablo's code, this is D
             distanceFunc: function(dm) {
                 return Math.exp(-1 * (dm/this.d0));
             },
 
-            /* Adjusts need to avoid obstacles */
+            // Adjusts need to avoid obstacles
             alphaObs: function(phi, perceivedObs) {
                 if (perceivedObs.length === 0) { return 0;}
                 return Math.tanh(perceivedObs.map(function(ob){
@@ -103,9 +100,8 @@
                                 }));
             },
 
-            /* Windowing function. Sees if obstacle is in the way.
-             * In Juan Pablo's code, this is W
-             */
+            // Windowing function. Sees if obstacle is in the way.
+            // In Juan Pablo's code, this is W
             windowFunc: function(phi, psi, dPsi) {
                 var phiPsi = Math.cos(phi - psi + Math.PI);
                 var dPsiSigma = Math.cos(dPsi + this.sigma);
@@ -113,53 +109,46 @@
                 return 0.5*(tan);
             },
 
-            /* Repeller function. Gets the repelling power of an obstacle.
-             * In Juan Pablo's code, this is R
-             */
+            // Repeller function. Gets the repelling power of an obstacle.
+            // In Juan Pablo's code, this is R
             repellerFunc: function(phi, psi, dPsi) {
                 return this.signum(((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi)));
             },
             
-            /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
-             * In Juan Pablo's code, this is sign.
-             */
+            // Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
+            // In Juan Pablo's code, this is sign.
             signum: function(x) {
                 return (x > 0) ? 1 : (x === 0) ? 0 : -1;
             },
 
-            /* The complete repeller function.
-             * In Juan Pablo's code, this is fObsI
-             */
+            // The complete repeller function.
+            // In Juan Pablo's code, this is fObsI
             fullRepellerFunc: function(phi, obs) {
                 var dist = this.distanceFunc(obs[0]),
                     win = this.windowFunc(phi, obs[1], obs[2]);
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
-                    console.log(rep);
                 return dist * win * rep;
             },
 
-            /* Detects where the target is.
-             * In Juan Pablo's code, this is P_tar
-             */
+            // Detects where the target is.
+            // In Juan Pablo's code, this is P_tar
             targetDetector: function(phi, psiTar) {
                 var dFtar_dPhi = this.a * Math.cos(phi - psiTar);
                 return -1 * this.signum(dFtar_dPhi) * Math.exp(-this.c1 * 
                     Math.abs(this.calculateAttraction(phi, psiTar)));
             },
 
-            /* Detects if an obstacle is in the way.
-             * In Juan Pablo's code, this is P_obs
-             */
+            // Detects if an obstacle is in the way.
+            // In Juan Pablo's code, this is P_obs
             obsDetector: function(phi, obsList) {
                 var fObs = 0;
                 var dFobs_dPhi = 0;
                 var w = 0;
                 var Di, Wi, Ri, tmp, help, dWi, dRi, psi, dm, dPsi;
                 
-                /* Each obstacle is an array of the form:
-                    [dm, psi, dPsi]
-                 */
+                // Each obstacle is an array of the form:
+                //   [dm, psi, dPsi]
                 obsList.map(function(ob){
                     dm = ob[0];
                     psi = ob[1];
@@ -181,24 +170,22 @@
                 return this.signum(dFobs_dPhi) * Math.exp(-this.c1 * Math.abs(fObs)) * w;
                 
             },
-            /* Sees if agent is heading towards a stable point or unstable 
-             * point
-             */
+            // Sees if agent is heading towards a stable point or unstable 
+            // point
             gammaObsTar: function(phi, psiTar, perceivedObs) {
                 var pTar = this.targetDetector(phi, psiTar),
                     pObs = this.obsDetector(phi, perceivedObs);
                 return Math.exp(-1 * this.c2 * pTar * pObs - this.c2);
             },
             
-            /* Defines an attractor.
-             * In Juan Pablo's code, this is fTar.
-             */
+            // Defines an attractor.
+            // In Juan Pablo's code, this is fTar.
             defAttractor: function(phi, psiTar) {
                 return this.a * Math.sin(phi - psiTar);
             },
 
-            /* Gets the weight of a target and a repeller.
-             * returns in the form [weight of targer, weight of obstacle]*/
+            // Gets the weight of a target and a repeller.
+            // returns in the form [weight of targer, weight of obstacle]
             getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
@@ -218,7 +205,7 @@
                 return [w1, w2];
             },
             
-            /* Get the heading that the agent should be moving in */
+            // Get the heading that the agent should be moving in
             getPhiDot: function(agent, perceivedObs) {
                 var phi = agent.heading;
                 var fObs = 0;
@@ -241,7 +228,7 @@
                 return phiDot;
             },
 
-            /* Perceive objects */
+            // Perceive objects
 			sense: function(agent) {
                 var pos = agent.position,
                     agSize = agent.size,
@@ -265,7 +252,7 @@
                 },this);
                 return perceivedObs;
             },
-            /* update the perception of objects*/
+            // update the perception of objects
             updateRepresentation: function(agent){
                 this.envObs = [];
 
@@ -320,11 +307,10 @@
                 }, this);
             },
 
-            /* Execute dynamical systems and move forward one timestep
-             */
+            // Execute dynamical systems and move forward one timestep
             execute: function(agent){
-				/* Currently updates both the position and heading because the position 
-                 * is dependent on the old heading*/
+				// Currently updates both the position and heading because the position 
+                // is dependent on the old heading
                 if (agent.target !== null) {
                     this.updateRepresentation(agent);
                     var perceivedObs = this.sense(agent),
@@ -351,7 +337,7 @@
 
 
 	(function(strategyObj){
-        /* Helper function for creating a 2-D Array (Grid) */
+        // Helper function for creating a 2-D Array (Grid)
         function Grid(rows, cols){
             for(var x = 0; x < rows; ++x){
                 this[x] = [];
@@ -360,10 +346,8 @@
                 }
             }
         }
-        /**
-         * The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
-         * at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. 
-         */
+        // The 2-Dimensional grid representing the world's occupancy data. A 0 is stored
+        // at position (i, j) if there is no obstacle at cell (i, j) and a 1 otherwise. 
         function WorldGrid(cellSize, xMax, yMax) {
             this.xMax = xMax;
             this.cellSize = cellSize;
@@ -374,7 +358,7 @@
         }
 
         WorldGrid.prototype = {
-            /* Add an object at position pos. */
+            // Add an object at position pos.
             addObject: function(pos) {
                 var gridSpace = this.toGridSpace(pos);
 
@@ -460,30 +444,29 @@
             clear: function(){
                 this.data = new Grid(this.nCols, this.nRows);    
             },
-            /* Remove an object at position pos. */
+            // Remove an object at position pos.
             removeObject: function(pos) {
                 var row = Math.floor((this.nRows * (pos.e(2) / this.yMax))),
                     col = Math.floor((this.nCols * (pos.e(1) / this.xMax)));
                 this.data[row][col] = 0;
             },
             
-            /* Takes a row and a column and returns true if the cell at that position
-               is on the world grid and false otherwise. */
+            // Takes a row and a column and returns true if the cell at that position
+            //is on the world grid and false otherwise.
             isInWorld: function(col, row) {
                 return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
             
             
-            /* Takes a row and column and returns an array of valid (row,col) pairs
-               if they are on the world grid. */
+            // Takes a row and column and returns an array of valid (row,col) pairs
+            // if they are on the world grid.
             adjacentCells: function(col, row) {
-                /* A cell and it's neighbors:
-                  *********
-                  * 0|1|2 *
-                  * 3|4|5 *
-                  * 6|7|8 *
-                  *********
-                 */
+                // A cell and it's neighbors:
+                //  *********
+                //  * 0|1|2 *
+                //  * 3|4|5 *
+                //  * 6|7|8 *
+                //  *********
                 var results = [[col-1, row-1], // 0
                                [col-1, row+1], // 6
                                [col+1, row-1], // 2
@@ -497,18 +480,14 @@
                 }, this);
                 return final;
             },
-            /**
-             * Gets the adjacent cells that are open.
-             */
+            // Gets the adjacent cells that are open.
             adjacentOpenCells: function(col,row){
                 return this.adjacentCells(col,row).filter(function(elem){
                     return this.data[elem[0]][elem[1]] === 0;
                 }, this);
             },
-            /**
-             * Converts a vector from grid space to world space. By the nature of this transformation, some information is lost so we
-             * translate to the center of a grid square in world space.
-             */
+            // Converts a vector from grid space to world space. By the nature of this transformation, some information is lost so we
+            // translate to the center of a grid square in world space.
             toWorldSpace: function(pos){
                 var cellSize = (this.xMax / this.nCols);
                 return Vector.create( [(pos.e(1) * cellSize) + cellSize/2, (pos.e(2) * cellSize) + cellSize/2] );  
@@ -522,10 +501,7 @@
             }
         };
 
-
-		/**
-		 * A node in the search tree. Stores heuristic data as well as parent info.
-		 */
+		// A node in the search tree. Stores heuristic data as well as parent info.
 		function Node(state, parent) {
 			this.state = state;
 			this.parent = parent;
@@ -546,9 +522,7 @@
 			}
 		};
 
-		/**
-		 * States in the world represented by a 2d Grid.
-		 */
+		// States in the world represented by a 2d Grid.
 		function GridNavState(col, row, grid) {
 			this.col = col;
 			this.row = row;
@@ -556,8 +530,8 @@
 		}
 
 		GridNavState.prototype = {
-			/* Returns an array of states if they represent cells that are are adjacent to the current
-			   cell and not obstructed. */
+			// Returns an array of states if they represent cells that are are adjacent to the current
+			// cell and not obstructed. 
 			applyOperators: function(){
 				// Generate the possible moves and create states from them.
 				var results = this.grid.adjacentOpenCells(this.col, this.row).map(function(elem){
@@ -570,11 +544,7 @@
 			}
 		};
 
-		/**
-		 * Perform heuristic search.
-		 * Input: The initial state, the goal state, a structure to represent the fringe of knowledge and a heuristic to use to compare states.
-		 * Output: The last node in the search path of an optimal solution.
-		 */
+		 // Perform heuristic search.
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
 			var maxExpansions = 10000,
 			    nodesExpanded = 0,
@@ -607,21 +577,12 @@
 			return null;
 		}
 
-		/**
-		 * Euclidean distance heuristic for A*
-		 * Input: Two states, the current state and the goal state
-		 * Output: The straight line disance between the two points the states represent.
-		 */
+		 // Euclidean distance heuristic for A*
 		function straightLineDist(currState, goalState){
-            /*
-            var currWorld = currState.grid.pairToWorld(currState.col, currState.row),
-                goalWorld = goalState.grid.pairToWorld(goalState.col, goalState.row);
-			return (Math.pow((currWorld.e(2) - goalWorld.e(2)),2) + Math.pow((currWorld.e(1) - goalWorld.e(1)),2));
-            */
             return Math.sqrt((Math.pow(currState.row - goalState.row,2) + Math.pow(currState.col - goalState.col,2)));
 		}
 
-		/* A* navigation strategy object */
+		// A* navigation strategy object 
 		function AStar(world){
             this.world = world;
             
@@ -638,11 +599,9 @@
             this.pathHash = {};
 		}
 		AStar.prototype = {
-            /**
-             * Convert from a node chain to an actual path.
-             * Input: A node that is the final node in a search path.
-             * Output: An array of vectors representing the path in grid space.
-             */
+             // Convert from a node chain to an actual path.
+             // Input: A node that is the final node in a search path.
+             // Output: An array of vectors representing the path in grid space.
             toPath: function(node, agent){
 
                 var results = [$V([node.state.col, node.state.row])];
@@ -655,7 +614,7 @@
                 results.shift();
                 return results;
             },
-			/* Generate the navigation path for the agent to follow */
+			// Generate the navigation path for the agent to follow
 			plan: function(){
 				
 			},

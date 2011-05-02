@@ -22,35 +22,6 @@
 		act: function() {
 			switch(this.strategy){
 				case "A*":
-                /*
-					if(this.path !== null){
-                        
-						if(this.path.length > 0 && this.interTarget === null){
-                            var next = this.path.shift();
-                            
-                            while(next.distanceFrom(this.position) <= 0.5 ||
-                                  next.distanceFrom(this.target) > this.position.distanceFrom(this.target)&&
-                                  this.path.length > 0){
-                                next = this.path.shift();
-                            }
-                            this.interTarget = next;
-						}else if(this.path.length === 0) {
-								this.path = this.interTarget = this.target = null;
-                                return;
-                        }
-                        
-
-
-							// Heading = The unitized vector representing (position - intermediate target)
-							this.heading = this.interTarget.subtract(this.position).toUnitVector();
-                            // Position = position + (speed * direction)
-							this.position = this.position.add(this.heading.multiply(this.speed));
-                            if(this.position.distanceFrom(this.interTarget) <= 1){
-                                this.interTarget = null;
-                            }
-					}
-                    */
-                    
                     if(this.interTarget){
                         this.heading = this.interTarget.subtract(this.position).toUnitVector();
                         
@@ -60,12 +31,10 @@
 
 					break;
 				case "dynamical":
-                    /* Since the new position is based on the old heading, at 
-                     * least temporarily this does nothing and the position 
-                     * and heading are updated in the execute function. 
-                     * Therefore TODO: have the position be updated here
-                     */
-                    
+                    // Since the new position is based on the old heading, at 
+                    // least temporarily this does nothing and the position 
+                    // and heading are updated in the execute function. 
+                    // Therefore TODO: have the position be updated here                    
 					break;
 				default:
 					break;
@@ -195,11 +164,10 @@
 
 					break;
 				case "dynamical":
-                    /* Since the new position is based on the old heading, at 
-                     * least temporarily this does nothing and the position 
-                     * and heading are updated in the execute function. 
-                     * Therefore TODO: have the position be updated here
-                     */
+                    // Since the new position is based on the old heading, at 
+                    // least temporarily this does nothing and the position 
+                    // and heading are updated in the execute function. 
+                    // Therefore TODO: have the position be updated here
                     
 					break;
 				default:

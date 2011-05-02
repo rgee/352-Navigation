@@ -84,32 +84,17 @@ $(document).ready(function(){
             var target = $V([this.mouseX, this.mouseY]);
             switch(this.mouseButton){
                 case 37:
-                    console.log(target.inspect() + ' maps to: ' + nav.aStar.grid.toGridSpace(target).inspect());
                     nav.world.agents.map(function(elem){
                         elem.target = target; 
                         elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
                     });
-                    /*
-                    var newAgent = new Nav.SupportAgent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true, nav.world);
-                    nav.world.agents.push(newAgent);
-                    */
                     break;
                 case 39:
                     nav.world.addWall(target, 100, 'h');
-                    //nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
-                    /*
-                    var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
-                    newAgent.health = Math.random();
-                    nav.world.agents.push(newAgent);
-                    */
                     break;
                 default:
                     break;
             }
-        };
-        
-        proc.keyPressed = function(){
-            
         };
 
         proc.drawAgent = function(agent){
@@ -121,7 +106,6 @@ $(document).ready(function(){
             this.fill(255, agent.health*255 ,agent.health*255 );
             this.ellipse(agent.position.e(1), agent.position.e(2), agent.size*2, agent.size*2);
             
-            //draw target
             if(agent.target !== null) {
                 
                 var pos = agent.target;

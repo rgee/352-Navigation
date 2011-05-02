@@ -14,10 +14,10 @@ $(document).ready(function(){
     
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
-    world.addExt($V([400,50]), 'n');
-    world.addExt($V([400,750]), 's');
-    world.addExt($V([750,300]), 'e');
-    world.addExt($V([50,300]), 'w');
+    world.addExt($V([400,50]), 800, 'n');
+    world.addExt($V([400,750]), 800, 's');
+    world.addExt($V([750,300]), 600, 'e');
+    world.addExt($V([50,300]), 600, 'w');
 
 
     var nav = new Nav(world);

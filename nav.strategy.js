@@ -271,10 +271,26 @@
                 }, this);
 
                 this.world.obstacles.map(function(elem){
-                    if(elem.type !== "wall") {
-                        this.envObs.push(new Circle(elem.position, elem.size));
-                    } else {
-                        // We're looking at a wall so TODO: Convert a wall to a bunch of circles.
+                    switch(elem.type) {
+                        case "exterior":
+                            switch(elem.direction){
+                                case 'n':
+                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)-100000]), 100000));
+                                    break;
+                                case 's':
+                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)+100000]), 100000));
+                                    break;
+                                case 'e':
+                                    this.envObs.push(new Circle($V([elem.position.e(1)+100000, elem.position.e(2)]), 100000));
+                                    break;
+                                case 'w':
+                                    this.envObs.push(new Circle($V([elem.position.e(1)-100000, elem.position.e(2)]), 100000));
+                                    break;
+                            }
+                            break;
+                        case "block":
+                            this.envObs.push(new Circle(elem.position, elem.size));
+                            break;
                     }
                 }, this);
             },

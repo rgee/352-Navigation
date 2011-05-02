@@ -4,14 +4,14 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
-    world.addAgent(new Nav.Agent($V([400,300]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([300,300]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([100,100]), $V([50,50]), 10, true));
+    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
+
     world.agents[0].target = ($V([400, 200]));
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("block", $V([100, 350]), 10));
-    world.addWall($V([105,295]), 380, 'v');
-    world.addWall($V([400,100]), 600, 'h');
-    world.addWall($V([695,295]), 380, 'v');
-    world.addWall($V([400,490]), 600, 'h');
 
     var nav = new Nav(world);
     
@@ -36,7 +36,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy== "dynamical") {
+            if (nav.world.agents[0].strategy== "A*") {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -73,8 +73,8 @@ $(document).ready(function(){
                     */
                     break;
                 case 39:
-                    //nav.world.addWall(target, 100, 'h');
-                    nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
+                    nav.world.addWall(target, 100, 'h');
+                    //nav.world.addObstacle(new Nav.Obstacle("block",target, 10));
                     /*
                     var newAgent = new Nav.Agent($V([target.e(1), target.e(2)]), $V([target.e(1), target.e(2)]), 10, true);
                     newAgent.health = Math.random();

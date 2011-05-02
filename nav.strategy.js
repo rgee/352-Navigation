@@ -403,8 +403,58 @@
                         }
                         
                         break;
+                    case 'exterior':
+                        switch(obs.direction){
+                            case 'n':
+                                this.spreadFill(obs, 'h');
+                                break;
+                            case 's':
+                                this.spreadFill(obs, 'h');
+                                break;
+                            case 'e':
+                                this.spreadFill(obs, 'v');
+                                break;
+                            case 'w':
+                                this.spreadFill(obs, 'v');
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                     default:
                         break;
+                }
+            },
+            // Fills in a strip of space on the occupancy grid, given an exterior wall object.
+            spreadFill: function(ob, orientation){
+                var center = ob.position,
+                    len = ob.size+10,
+                    gridCenter = this.toGridSpace(ob.position);
+                if(orientation === 'h'){
+                    // The number of grid squares to the left & right this object extends from its
+                    // center.
+                    var gridLeftX = this.toGridSpace($V([center.e(1) - len/2, center.e(2)])).e(1),
+                        gridRightX = this.toGridSpace($V([center.e(1) + len/2, center.e(2)])).e(1);
+                    
+                    for(var x = gridCenter.e(1); x < gridRightX; x++){
+                        this.data[x][gridCenter.e(2)] = 1;
+                    }
+                    for(x = gridCenter.e(1); x > gridLeftX; x--){
+                        this.data[x][gridCenter.e(2)] = 1;   
+                    }
+
+                }else if(orientation === 'v'){
+                    // The number of grid squares to the top and bottom this object extends from its
+                    // center.
+                    var gridTopY = this.toGridSpace($V([center.e(1), center.e(2) - len/2])).e(2),
+                        gridBottomY = this.toGridSpace($V([center.e(1), center.e(2) + len/2])).e(2);
+                    
+                    for(var y = gridCenter.e(2); y < gridBottomY; y++){
+                        this.data[gridCenter.e(1)][y] = 1;    
+                    }
+                    for(y = gridCenter.e(2); y > gridTopY; y--){
+                        this.data[gridCenter.e(1)][y] = 1;    
+                    }
                 }
             },
             clear: function(){

@@ -2,6 +2,7 @@ $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];
         world.obstacles = [];
+    //world.addAgent(new Nav.Agent($V([400,300]), $V([50,50]), 5, false));
 
     
     var i=0;
@@ -15,11 +16,12 @@ $(document).ready(function(){
         world.addAgent(new Nav.Agent($V([x,y]), $V([50,50]), 5, true));
         i++;
     }
-
+    
+    
     world.obstacles.push(new Nav.Obstacle("block", $V([300, 350]), 10));
     world.addWall($V([350,200]), 100, 'h');
-    world.addExt($V([400,50]), 800, 'n');
-    world.addExt($V([400,550]), 800, 's');
+    world.addExt($V([399,50]), 800, 'n');
+    world.addExt($V([399,550]), 800, 's');
     world.addExt($V([750,300]), 600, 'e');
     world.addExt($V([50,300]), 600, 'w');
     world.addFire($V([50,50]));

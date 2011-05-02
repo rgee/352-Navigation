@@ -3,7 +3,7 @@
         this.world = world;
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);
-        this.debug = true;
+        this.debug = false;
 	}
 
     Nav.prototype = {
@@ -12,12 +12,13 @@
             for(var i = 0; i < agents.length; i++){
                 if(agents[i].strategy === "A*"){
                     this.aStar.execute(agents[i]);
+                    agents[i].act();
                 } else {
                     // Do DS
                     this.dynamical.execute(agents[i]);
                 }
 
-                agents[i].act();
+
             }
             this.world.obstacles.map(function(e){
                 if (e.type === "fire"){e.update();}

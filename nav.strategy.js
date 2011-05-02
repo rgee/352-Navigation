@@ -27,15 +27,11 @@
         }
 
         function collision(o1, o2){
-            if(o1.health){
-                o1.health -= .1;
-                if(o1.health<0) o1.health=0;
+            if(o1.health !== undefined){
+                o1.takeDamage();
+            }else if(o2.health !== undefined){
+                o2.takeDamage();
             }
-            if(o2.health){
-                o2.health -= .1;
-                if(o2.health<0) o2.health=0;
-            }
-                
         }
         
         // Dynamical systems navigation strategy object 
@@ -43,6 +39,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
+
             this.d0 = 30;
             this.c1 = 2.0;
             this.c2 = 2.0;

@@ -53,7 +53,7 @@ $(document).ready(function(){
         
         proc.drawDebugInfo = function(){
             var cellSize = nav.aStar.grid.cellSize;
-            if (nav.world.agents[0].strategy === "A*") {
+            if (nav.world.agents.some(function(e){ return e.strategy === 'A*';})) {
                 for(var x = 0; x < nav.aStar.grid.xMax/cellSize; x++){
                     for(var y = 0; y < nav.aStar.grid.yMax/cellSize; y++){
                         var coords =nav.aStar.grid.toWorldSpace($V([x,y]));
@@ -83,6 +83,7 @@ $(document).ready(function(){
             }
         };
         
+        // Respond to mouse events.
         proc.mousePressed = function() {
             var target = $V([this.mouseX, this.mouseY]);
             switch(this.mouseButton){
@@ -99,15 +100,15 @@ $(document).ready(function(){
                     break;
             }
         };
-
+        
+        // Draw an agent in the world.
         proc.drawAgent = function(agent){
-
             if(agent.path !== null){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.ellipseMode(0);
             this.fill(255, agent.health*255 ,agent.health*255 );
-            this.ellipse(agent.position.e(1), agent.position.e(2), agent.size*2, agent.size*2);
+            this.ellipse(agent.position.e(1) - 5, agent.position.e(2) - 5, agent.size*2, agent.size*2);
             
             if(agent.target !== null) {
                 
@@ -121,11 +122,7 @@ $(document).ready(function(){
             }
         };
 
-        /**
-         * Visualize a path in a grid.
-         *
-         * Input: A path (list of vectors), a grid (you know what this is...)
-         */ 
+        // Visualize a path in a grid.
         proc.drawPath = function(path, grid) {
            var node = 0,
                numNodes = path.length,
@@ -137,7 +134,7 @@ $(document).ready(function(){
                 x = path[node].e(1);
                 y = path[node].e(2);    
                 this.ellipseMode(0);
-                this.ellipse(x, y, width, height);
+                this.ellipse(x-5, y-5, width, height);
                 
                 if(node + 1 < numNodes) {
                     nextX = path[node+1].e(1);
@@ -147,14 +144,33 @@ $(document).ready(function(){
             }
         };
 
+        // Draw an obstacle in the world
         proc.drawObstacle = function(obstacle) {
-            if(obstacle.type === 'wall'){
-                this.stroke(255,255,255);
-                this.strokeWeight(10);
-                this.line(obstacle.endPoints[0].e(1), obstacle.endPoints[0].e(2), obstacle.endPoints[1].e(1), obstacle.endPoints[1].e(2));
-                this.strokeWeight(1);
-            }else{
-                this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
+            switch(obstacle.type){
+                case 'exterior':
+                    this.rectMode(3);
+                    this.noStroke();
+                    this.fill(255,255,255);
+                    if(obstacle.direction == 'n' || obstacle.direction == 's'){
+                        this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, 10);
+                    } else {
+                        this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, obstacle.size);   
+                    }
+                    this.stroke(0,0,0);
+                    break;
+                case 'block':
+                    this.noStroke();
+                    this.fill(255,255,255);
+                    this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, obstacle.size);
+                    break;
+                case 'fire':
+                    this.noFill();
+                    this.ellipseMode(3);
+                    this.stroke(247, 115, 7);
+                    this.ellipse(obstacle.position.e(1), obstacle.position.e(2), obstacle.size*2, obstacle.size*2);
+                    break;
+                default:
+                    break;
             }
         };
     };

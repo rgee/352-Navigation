@@ -25,6 +25,18 @@
             this.center = pos;
             this.radius = rad;
         }
+
+        function collision(o1, o2){
+            if(o1.health){
+                o1.health -= .1;
+                if(o1.health<0) o1.health=0;
+            }
+            if(o2.health){
+                o2.health -= .1;
+                if(o2.health<0) o2.health=0;
+            }
+                
+        }
         
         /* Dynamical systems navigation strategy object */
 		function Dynamical(world){
@@ -34,7 +46,7 @@
             this.d0 = 100;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 5.0;
+            this.a = 3.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -43,12 +55,12 @@
             this.gTarObs = 0.05;
             this.timestep = 0.05;
 		}
-        
+
         
 		Dynamical.prototype = {
             /* Returns angle between an agent and a target*/
             computeAngle: function(aPos, tPos) {
-                return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1)) - Math.PI;
+                return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
             },
             /* Returns delta Psi, the angle between the internal tangents of 
              * two circles.
@@ -73,7 +85,7 @@
             calculateAttraction: function(phi, psiTar) {
                 return -this.a * Math.sin(phi - psiTar);
             },
-            
+
             /* Distance function. Adjusts force of repeller by distance.
              * In Juan Pablo's code, this is D
              */
@@ -96,22 +108,21 @@
              * In Juan Pablo's code, this is W
              */
             windowFunc: function(phi, psi, dPsi) {
-                var phiPsi = Math.cos(phi - psi);
+                var phiPsi = Math.cos(phi - psi+Math.PI);
                 var dPsiSigma = Math.cos(dPsi + this.sigma);
                 var tan = Math.tanh(this.h1 * (phiPsi - dPsiSigma)) + 1;
                 return 0.5*(tan);
-                //return 0.5*(Math.tanh(this.h1*(Math.cos(phi - psi) - 
-                //    Math.cos(dPsi + this.sigma) + Math.PI)) + 1);
             },
 
             /* Repeller function. Gets the repelling power of an obstacle.
              * In Juan Pablo's code, this is R
              */
             repellerFunc: function(phi, psi, dPsi) {
-                console.log(((phi - psi)/dPsi) *
-                    Math.exp(1 - Math.abs((phi - psi)/dPsi)));
+                //console.log(((phi - psi)/dPsi) *
+                //    Math.exp(1 - Math.abs((phi - psi)/dPsi)));
                 return ((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi));
+                //return 1;
             },
             
             /* Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -165,7 +176,6 @@
                     help = (phi - psi)/dPsi;
                     dWi = (-0.5 * this.h1 * tmp * tmp * Math.sin(phi - psi));
                     dRi = (((dPsi - Math.abs(phi - psi)) * Math.exp(1-Math.abs(help))) / (dPsi * dPsi));
-
                     dFobs_dPhi += (Di * (Wi * dRi + dWi * Ri));
                     w += Wi;
                 }, this);
@@ -229,10 +239,9 @@
 						return prev + curr;
 					});
 				}
-				weightedObs = (Math.abs(agent.weights[1]) * fObs) % (Math.PI * 2);
+				weightedObs = ((Math.abs(agent.weights[1]) * fObs));
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     weightedObs + 0.01*(Math.random()-0.5);
-				//console.log(phiDot + "\t" + (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + "\t" + (Math.abs(agent.weights[1] * fObs)));
                 return phiDot;
             },
 
@@ -254,8 +263,8 @@
                         //console.log(dm);
                         psi = this.computeAngle(pos, elem.center);
                         dPsi = this.subtendedAngle(new Circle(pos, agSize), elem);
-                        psi = (Math.PI * 2 + psi) % (Math.PI * 2);
-                        dPsi = (Math.PI * 2 + dPsi) % (Math.PI * 2);
+                        psi = (Math.PI * 2 + psi);
+                        dPsi = (Math.PI * 2 + dPsi);
                         perceivedObs.push([dm, psi, dPsi]); 
                     }
                 },this);
@@ -265,9 +274,18 @@
             updateRepresentation: function(agent){
                 this.envObs = [];
 
+                var obsCirc;
                 this.world.agents.map(function(elem){
                     if(elem !== agent) {
-                        this.envObs.push(new Circle(elem.position, elem.size));
+                        obsCirc=new Circle(elem.position, elem.size);
+                        //collision detection
+                        dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
+                        if(dm<0){
+                            collision(agent, elem);
+                            agent.heading = this.computeAngle(agent.position, obsCirc.center);
+                            agent.heading = agent.heading%(Math.PI*2);
+                        }
+                        this.envObs.push(obsCirc);
                     }
                 }, this);
 
@@ -276,23 +294,29 @@
                         case "exterior":
                             switch(elem.direction){
                                 case 'n':
-                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)-100000]), 100000));
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000]), 10000);
                                     break;
                                 case 's':
-                                    this.envObs.push(new Circle($V([elem.position.e(1), elem.position.e(2)+100000]), 100000));
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000]), 10000);
                                     break;
                                 case 'e':
-                                    this.envObs.push(new Circle($V([elem.position.e(1)+100000, elem.position.e(2)]), 100000));
+                                    obsCirc=new Circle($V([elem.position.e(1)+10000, elem.position.e(2)]), 10000);
                                     break;
                                 case 'w':
-                                    this.envObs.push(new Circle($V([elem.position.e(1)-100000, elem.position.e(2)]), 100000));
+                                    obsCirc=new Circle($V([elem.position.e(1)-10000, elem.position.e(2)]), 10000);
                                     break;
                             }
                             break;
                         case "block":
-                            this.envObs.push(new Circle(elem.position, elem.size));
+                            obsCirc=new Circle(elem.position, elem.size);
                             break;
                     }
+                    dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
+                    if(dm<0){
+                        //collision(agent, elem);
+                        agent.heading = (agent.heading+Math.PI)%(Math.PI*2);
+                    }
+                    this.envObs.push(obsCirc);
                 }, this);
             },
 
@@ -308,13 +332,13 @@
                         pd = this.getPhiDot(agent, perceivedObs),
                         vel = agent.velocity,
                         oldHeading = agent.heading,
-                        xd = 50 * Math.cos(agent.heading),
-                        yd = 50 * Math.sin(agent.heading);
+                        xd = vel.e(1) * agent.health * Math.cos(agent.heading),
+                        yd = vel.e(2) * agent.health * Math.sin(agent.heading);
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
 
-                    agent.heading = (newHeading + 2 * Math.PI) % (2 * Math.PI);
+                    agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= 20){
                         agent.target = null;

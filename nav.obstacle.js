@@ -7,7 +7,6 @@
 	}
 	Obstacle.prototype ={   
         update: function(){
-
             
         }
     };

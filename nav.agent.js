@@ -9,7 +9,7 @@
 		this.size = size;
         this.id = null;
         
-        // [0,1]
+        // [between 0 and 1]
         this.health = 1.0;
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack

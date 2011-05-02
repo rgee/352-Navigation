@@ -1,5 +1,5 @@
 (function(global) {
-	function Nav(agents, obstacles){
+	function Nav(agents, obstacles, fires, walls){
         this.world = new Nav.World();
         this.world.agents = agents;
         this.world.obstacles = obstacles;

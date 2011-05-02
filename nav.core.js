@@ -1,11 +1,9 @@
 (function(global) {
-	function Nav(agents, obstacles, fires, walls){
-        this.world = new Nav.World();
-        this.world.agents = agents;
-        this.world.obstacles = obstacles;
-
+	function Nav( world){
+        this.world = world;
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);
+        this.debug = false;
 	}
 
     Nav.prototype = {
@@ -21,6 +19,9 @@
 
                 agents[i].act();
             }
+            this.world.obstacles.map(function(e){
+                e.update(); 
+            });
         }
            
     };
@@ -32,4 +33,4 @@
 		global.Nav = Nav;
 	}
 
-})(window)
+})(window);

@@ -31,7 +31,7 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 20.0;
+            this.d0 = 20;
             this.c1 = 2.0;
             this.c2 = 2.0;
             this.a = 3.0;
@@ -197,6 +197,7 @@
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
                 for (var i = 0; i < 100; i++) {
+                    //w1 is target, w2 is obstacle
                     var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
                     var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
                     w1 += w1dot * this.timestep;
@@ -218,7 +219,6 @@
                 var psiTar = this.computeAngle(agent.position, agent.target);
                 agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
                     agent.weights[1], perceivedObs); //of the form [wtar, wobs]
-
 				if (perceivedObs.length === 0) {
 					fObs = 0;
 				}
@@ -235,6 +235,7 @@
 				//console.log(phiDot + "\t" + (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + "\t" + (Math.abs(agent.weights[1] * fObs)));
                 return phiDot;
             },
+
             /* Perceive objects */
 			sense: function(agent) {
                 var pos = agent.position,
@@ -346,6 +347,7 @@
          */
         function WorldGrid(cellSize, xMax, yMax) {
             this.xMax = xMax;
+            this.cellSize = cellSize;
             this.yMax = yMax;
             this.nRows = yMax / cellSize;
             this.nCols = xMax / cellSize;
@@ -358,6 +360,33 @@
                 var gridSpace = this.toGridSpace(pos);
 
                 this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
+            },
+            // This function deals with objects overlapping grid boundaries
+            addObstacle: function(obs){
+                var gridSpacePos = this.toGridSpace(obs.position);
+                this.data[gridSpacePos.e(1)][gridSpacePos.e(2)] = 1;
+                switch(obs.type){
+                    case 'block':
+                        var eastEdgeExtent, westEdgeExtent, northEdgeExtent, southEdgeExtent;
+                        
+                        // Check if the east edge of this block is in another grid square.
+                        eastEdgeExtent = this.toGridSpace($V([obs.position.e(1) + obs.size, obs.position.e(2)]));
+                        if(eastEdgeExtent.e(1) > gridSpacePos.e(1) &&
+                           this.isInWorld(eastEdgeExtent.e(1), eastEdgeExtent.e(2))){
+                            this.data[eastEdgeExtent.e(1)][eastEdgeExtent.e(2)] = 1;    
+                        }
+                        
+                        // Check if the west edge of this block is in another grid square.
+                        westEdgeExtent = this.toGridSpace($V([obs.position.e(1) - obs.size, obs.position.e(2)]));
+                        if(westEdgeExtent.e(1) < gridSpacePos.e(1) &&
+                           this.isInWorld(westEdgeExtent.e(1), westEdgeExtent.e(1))){
+                            this.data[westEdgeExtent.e(1)][westEdgeExtent.e(2)] = 1;       
+                        }
+                        
+                        break;
+                    default:
+                        break;
+                }
             },
             clear: function(){
                 this.data = new Grid(this.nCols, this.nRows);    
@@ -375,10 +404,25 @@
                 return (row >= 0 && row < this.nRows) && (col >= 0 && col < this.nCols);
             },
             
+            
             /* Takes a row and column and returns an array of valid (row,col) pairs
                if they are on the world grid. */
             adjacentCells: function(col, row) {
-                var results = [[col+1,row],[col-1,row],[col,row+1],[col,row-1]];
+                /* A cell and it's neighbors:
+                  *********
+                  * 0|1|2 *
+                  * 3|4|5 *
+                  * 6|7|8 *
+                  *********
+                 */
+                var results = [[col-1, row-1], // 0
+                               [col-1, row+1], // 6
+                               [col+1, row-1], // 2
+                               [col+1, row+1], // 8
+                               [col+1, row], // 5
+                               [col-1, row], // 3
+                               [col, row+1], // 7
+                               [col, row-1]]; // 1
                 var final =  results.filter(function(elem){
                     return this.isInWorld(elem[0],elem[1]); 
                 }, this);
@@ -399,6 +443,9 @@
             toWorldSpace: function(pos){
                 var cellSize = (this.xMax / this.nCols);
                 return Vector.create( [(pos.e(1) * cellSize) + cellSize/2, (pos.e(2) * cellSize) + cellSize/2] );  
+            },
+            pairToWorld: function(col, row){
+                return Vector.create( [(col * this.cellSize) + this.cellSize / 2, (row * this.cellSize) + this.cellSize/2] );
             },
             toGridSpace: function(pos){
                 return Vector.create( [Math.floor(((this.nCols - 1) * (pos.e(1) / this.xMax))),
@@ -460,7 +507,7 @@
 		 * Output: The last node in the search path of an optimal solution.
 		 */
 		function heuristicSearch(initialState, goalState, fringe, heuristic){
-			var maxExpansions = 35000,
+			var maxExpansions = 10000,
 			    nodesExpanded = 0,
 			    start = new Node(initialState),
 				closedStates = new HashSet(function(u){return $V([u.row, u.col]);}, function(u,v){return u.equals(v);}),
@@ -500,7 +547,12 @@
 		 * Output: The straight line disance between the two points the states represent.
 		 */
 		function straightLineDist(currState, goalState){
-			return (Math.pow((currState.row - goalState.row),2) + Math.pow((currState.col - goalState.col),2));
+            /*
+            var currWorld = currState.grid.pairToWorld(currState.col, currState.row),
+                goalWorld = goalState.grid.pairToWorld(goalState.col, goalState.row);
+			return (Math.pow((currWorld.e(2) - goalWorld.e(2)),2) + Math.pow((currWorld.e(1) - goalWorld.e(1)),2));
+            */
+            return Math.sqrt((Math.pow(currState.row - goalState.row,2) + Math.pow(currState.col - goalState.col,2)));
 		}
 
 		/* A* navigation strategy object */
@@ -510,6 +562,14 @@
             // Create the world grid here
             this.grid = new WorldGrid(10,800,600);
             this.updateRepresentation();
+            
+            // Map from agent ids to path arrays.
+            // Needed so we can verify the validity of paths against the /grid/, 
+            // which agents themselves have nor should have access to. Now when an agent
+            // calls execute, the A* module will first check if that agent's path is valid
+            // then if it is, return the node the agent should be heading to currently. If not
+            // it will recompute the path and store it here.
+            this.pathHash = {};
 		}
 		AStar.prototype = {
             /**
@@ -517,14 +577,17 @@
              * Input: A node that is the final node in a search path.
              * Output: An array of vectors representing the path in grid space.
              */
-            toPath: function(node){
+            toPath: function(node, agent){
+
                 var results = [$V([node.state.col, node.state.row])];
-                while(!!(node = node.parent)){
+                while((node = node.parent)){
                     results.push($V([node.state.col, node.state.row]));
                 }
-                return results.reverse().map(function(elem){
+                results =  results.reverse().map(function(elem){
                     return this.grid.toWorldSpace(elem);
                 }, this);
+                results.shift();
+                return results;
             },
 			/* Generate the navigation path for the agent to follow */
 			plan: function(){
@@ -532,29 +595,76 @@
 			},
             updateRepresentation: function(){
                 this.grid.clear();
+                
                 this.world.agents.map(function(elem){
                     this.grid.addObject(elem.position);
                 }, this);
                 this.world.obstacles.map(function(elem){
-                    this.grid.addObject(elem.position); //the position was added as a hack
+                    
+                    this.grid.addObstacle(elem);
                 },this);
+                
+                
+            },
+            pathInvalid: function(path){
+                if(!path || path.length === 0){
+                    return true;    
+                }
+                // We only care about obstructions along the first maxDistance nodes of the path
+                // since looking only so far ahead means there's a higher chance a further obstruction
+                // will be the fault of a dynamic object, so it will have moved away by the time we reach
+                // it.
+                var maxDistance = 4,
+                    node;
+                    
+                maxDistance = (path.length < maxDistance ? path.length : maxDistance);
+                for(var i = 0; i < maxDistance; i++){
+                    node = this.grid.toGridSpace(path[i]);
+                    if(this.grid.data[node.e(1)][node.e(2)] === 1){
+                        console.log(node.inspect() + ' is blocked');
+                        return true;    
+                    }
+                }
+                return false;
+            },
+            // Returns the next intermediate target an agent needs to reach its goal.
+            getNextTarget: function(agent){
+                var gridPos = this.grid.toGridSpace(agent.position),
+                    path = this.pathHash[agent.id],
+                    currentTarget = agent.interTarget;
+                if(agent.interTarget){
+                    var currentTargetGrid = this.grid.toGridSpace(currentTarget);
+                    if(gridPos.eql(currentTargetGrid)){
+                        if(path.length === 0){
+                            agent.interTarget = null;
+                            this.pathHash[agent.id] = null;
+                        } else {
+                            agent.interTarget = path.shift();
+                        }
+                    }
+                } else {
+                    agent.interTarget = (path.length === 0 ? null : path.shift());
+                }
             },
 			execute: function(agent){
-                if(agent.path === null && agent.target !== null){
-                   
-    				var gridSpacePos = this.grid.toGridSpace(agent.position),
-    				    gridSpaceTar = this.grid.toGridSpace(agent.target),
-    				    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
-    				    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
-    				    fringe = new BinHeap(function(node){ return node.h + node.g; }),
-    				    heuristic = straightLineDist,
-    				    result = heuristicSearch(initial, goal, fringe, heuristic);
-                    if(result !== null){
-    				    agent.path = this.toPath(result);
-                    }
-
-                }
                 this.updateRepresentation();
+                if(agent.target !== null){
+                    if(!this.pathInvalid(this.pathHash[agent.id])){
+                        this.getNextTarget(agent);
+                    } else {
+            			var gridSpacePos = this.grid.toGridSpace(agent.position),
+            			    gridSpaceTar = this.grid.toGridSpace(agent.target),
+            			    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
+            			    goal = new GridNavState(gridSpaceTar.e(1), gridSpaceTar.e(2), this.grid),
+            			    fringe = new BinHeap(function(node){ return (node.h + node.g); }),
+            			    heuristic = straightLineDist,
+            			    result = heuristicSearch(initial, goal, fringe, heuristic);
+                        if(result !== null){
+                            this.pathHash[agent.id] = this.toPath(result, agent);
+            			    agent.path = this.pathHash[agent.id];
+                        }
+                    }
+                }
 			}
 		};
 		Strategy.AStar = AStar;

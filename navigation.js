@@ -3,13 +3,14 @@ $(document).ready(function(){
     var world = new Nav.World();
         world.agents = [];
         world.obstacles = [];
-    world.agents.push(new Nav.Agent($V([400,600]), $V([50,50]), 10, true));
+    world.agents.push(new Nav.Agent($V([400,400]), $V([50,50]), 10, true));
     world.agents[0].target = ($V([400, 200]));
     world.agents[0].heading = 3/2 * Math.PI;
     world.obstacles.push(new Nav.Obstacle("goldfish", $V([100, 350]), 10));
-
-
-
+    world.addWall($V([105,295]), 380, 'v');
+    world.addWall($V([400,100]), 600, 'h');
+    world.addWall($V([695,295]), 380, 'v');
+    world.addWall($V([400,490]), 600, 'h');
 
     var nav = new Nav(world);
     

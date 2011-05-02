@@ -31,10 +31,10 @@
 			this.world = world;
             this.envObs = [];
             //Parameters
-            this.d0 = 0.001;
+            this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 10.0;
+            this.a = 3;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target

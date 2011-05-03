@@ -40,7 +40,7 @@
                     if(this.interTarget){
                         this.heading = this.interTarget.subtract(this.position).toUnitVector();
                         
-                        this.position = this.position.add(this.heading.multiply(this.speed));
+                        this.position = this.position.add(this.heading.multiply(this.speed  * this.health));
                     }
 
 
@@ -58,9 +58,9 @@
         takeDamage: function(){
             if(this.health){
                 this.health -=  0.1;    
-                if(this.health < 0) this.health = 0;
+                if(this.health <= 0) this.health = 0;
             }
-            this.alive = !!this.health;
+            this.alive = (this.health ? true : false);
         }
 	};
     
@@ -75,6 +75,7 @@
 		this.speed = 5;
 		this.size = size;
         this.escaped = false;
+        this.exit = $V([720,500]);
 		this.heading = 2*Math.PI;
 		this.weights = [0.99, 0.99]; //for dynamical, setting here as hack
         // Default to A* navigation unless the dynamical flag is true
@@ -86,8 +87,11 @@
                             "escape" : 0.5
                           };
         this.assistMode = this.escapeMode = false;
-        this.assistRange = 1;
+        this.assistRange = 20;
         this.healthDangerLevel = 0.3;
+        this.replanTimeout = 1000;
+        this.failedLastPlan = false;
+        this.shouldReplan = true;
     }
     SupportAgent.prototype = new  Agent();
     SupportAgent.prototype.constructor = SupportAgent;
@@ -128,12 +132,13 @@
         takeDamage: function(){
             if(this.health){
                 this.health -=  0.1;    
-                if(this.health < 0) this.health = 0;
+                if(this.health <= 0) this.health = 0;
             }
-            this.alive = !!this.health;
+            this.alive = (this.health ? true : false);
         },
        // Help another agent. Specifics TBD.
        assist : function(agent){
+            agent.health = 1;
        },
        evaluatePriorities : function(){
            if(this.health <= this.healthDangerLevel){
@@ -146,49 +151,38 @@
        },
        act : function(){
             // Determine if we can help something or find something to go help.
-            if(this.assistMode){
-                if(true){
-                    this.seekTarget(); 
-                    // If we didn't find anyone to help, do nothing for now.
-                    if(this.assistTarget){
-                        if(this.position.distanceFrom(this.assistTarget.position) <= this.assistRange) {
-                            this.assist(this.assistTarget);
-                            this.assistTarget = null;
-                            this.target = null;
-                        } else {
-                            this.target = this.assistTarget.position;   
-                        }
-                    }
+            this.seekTarget(); 
+            // If we didn't find anyone to help, do nothing for now.
+            if(this.assistTarget){
+                if(this.position.distanceFrom(this.assistTarget.position) <= this.assistRange) {
+                    this.assist(this.assistTarget);
+                    this.assistTarget = null;
+                    this.target = this.exit;
+                    this.escapeMode = true;
+                    this.assistMode = false;
+                } else {
+                    this.assitMode = true;
+                    this.escapeMode = false;
+                    this.target = this.assistTarget.position;   
                 }
-
-            } else if(this.escapeMode){
-                
             }
             // Actually go help or escape.
             switch(this.strategy){
 				case "A*":
-					if(this.path !== null){
-						if(this.path.length > 0){
-                            var next = this.path.shift();
-                            while(next.distanceFrom(this.position) <= 0.5 ||
-                                  next.distanceFrom(this.target) > this.position.distanceFrom(this.target)&&
-                                  this.path.length > 0){
-                                next = this.path.shift();
-                            }
-                            this.interTarget = next;
-						}
-                        if(this.path.length === 0){
-                                console.log('final agent pos: ' + this.position.inspect());
-								this.path = this.interTarget = this.target = null;
-                                return;
-                        }
-                        
-                        // Heading = The unitized vector representing (position - intermediate target)
+                    if(this.failedLastPlan){
+                        this.replanTimeout *= 2;
+                        this.shouldReplan = false;
+                        this.failedLastPlan = false;
+                        var that = this,
+                            callback = function(){ that.shouldReplan = true; };
+                            
+                        setTimeout(callback, this.replanTimeout);
+                    }
+                     if(this.interTarget){
                         this.heading = this.interTarget.subtract(this.position).toUnitVector();
-                        // Position = position + (speed * direction)
-                        this.position = this.position.add(this.heading.multiply(this.speed));
-                        this.interTarget = null;
-					}
+                        
+                        this.position = this.position.add(this.heading.multiply(this.speed  * this.health));
+                    }
 
 
 					break;

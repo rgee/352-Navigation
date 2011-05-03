@@ -23,6 +23,7 @@
                 } else {
                     // Do DS
                     this.dynamical.execute(agents[i]);
+                    agents[i].act();
                 }
             }
             this.world.agents = this.world.agents.filter(function(e){

@@ -27,10 +27,10 @@ $(document).ready(function(){
     world.addAgent(new Nav.Agent($V([440,75]), $V([50,50]), 5, false));
     world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 5, false));
     world.addAgent(new Nav.Agent($V([375,375]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([125,75]), $V([50,50]), 5, false));   
+    world.addAgent(new Nav.SupportAgent($V([125,75]), $V([50,50]), 5, true, world));
     world.addAgent(new Nav.Agent($V([90,420]), $V([50,50]), 5, false));   
     world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 5, false));   
-    world.addAgent(new Nav.Agent($V([135,70]), $V([50,50]), 5, false));      
+    //world.addAgent(new Nav.Agent($V([135,70]), $V([50,50]), 5, false));      
     //top left is 50,50; bottom right is 750,550
     world.addWall($V([395,50]), 700, 'h');
     world.addWall($V([395,550]), 700, 'h');
@@ -51,6 +51,8 @@ $(document).ready(function(){
         elem.target = target; 
         elem.heading = computeAngle(elem.position, target);
     });
+    
+    world.agents[4].health = 0.1;
 
     var nav = new Nav(world);
     

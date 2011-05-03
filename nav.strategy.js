@@ -242,7 +242,7 @@
 				weightedObs = (Math.abs(agent.weights[1]) * fObs); 
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     -1 * weightedObs + 0.01*(Math.random()-0.5);
-                console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
+                //console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
                 return phiDot;
             },
 

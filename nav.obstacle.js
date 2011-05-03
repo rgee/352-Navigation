@@ -12,7 +12,6 @@
         }
     };
 
-
 	// Expose Agent constructor to main module
 	Nav.Obstacle = Obstacle;
 })();

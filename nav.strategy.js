@@ -70,7 +70,6 @@
                 else{
                     return -(Math.PI/2) - Math.asin((aPos.e(1)-tPos.e(1))/d)+Math.PI;
                 }
-                //return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
             },
             // Returns delta Psi, the angle between the internal tangents of 
             // two circles.
@@ -242,7 +241,6 @@
 				weightedObs = (Math.abs(agent.weights[1]) * fObs); 
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     -1 * weightedObs + 0.01*(Math.random()-0.5);
-                //console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
                 return phiDot;
             },
 
@@ -651,6 +649,7 @@
                 
                 
             },
+            // Check if a given path is invalid.
             pathInvalid: function(path, agent){
                 if(!path){
                     return true;    

@@ -19,11 +19,24 @@
 		dynamical = dynamical || false;
 		this.strategy = (dynamical ? "dynamical" : "") || "A*";
 		this.path = null;
+        this.replanTimeout = 1000;
+        this.failedLastPlan = false;
+        this.shouldReplan = true;
 	}
 	Agent.prototype = {
 		act: function() {
 			switch(this.strategy){
 				case "A*":
+                    if(this.failedLastPlan){
+                        this.replanTimeout *= 2;
+                        this.shouldReplan = false;
+                        this.failedLastPlan = false;
+                        var that = this,
+                            callback = function(){ that.shouldReplan = true; };
+                            
+                        setTimeout(callback, this.replanTimeout);
+                    }
+                    
                     if(this.interTarget){
                         this.heading = this.interTarget.subtract(this.position).toUnitVector();
                         

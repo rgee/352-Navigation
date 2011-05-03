@@ -40,10 +40,10 @@
             this.envObs = [];
             //Parameters
 
-            this.d0 = 25;
+            this.d0 = 800;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.0;
+            this.a = 4;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -122,8 +122,8 @@
             // Repeller function. Gets the repelling power of an obstacle.
             // In Juan Pablo's code, this is R
             repellerFunc: function(phi, psi, dPsi) {
-                return this.signum(((phi - psi)/dPsi) *
-                    Math.exp(1 - Math.abs((phi - psi)/dPsi)));
+                return ((phi - psi)/dPsi) *
+                    Math.exp(1 - Math.abs((phi - psi)/dPsi));
             },
             
             // Returns 1 if x > 0, 0 if x == 0 and -1 if x < 0.
@@ -196,23 +196,27 @@
 
             // Gets the weight of a target and a repeller.
             // returns in the form [weight of targer, weight of obstacle]
-            getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
+            getWeights: function(phi, psiTar, weightTarget, weightObs, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
                 for (var i = 0; i < 100; i++) {
                     //w1 is target, w2 is obstacle
-                    var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
-                    var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
-                    w1 += w1dot * this.timestep;
-                    w2 += w2dot * this.timestep;
+                    var w1dot = (this.aTar * weightTarget * (1 - weightTarget *
+                        weightTarget) - g21 * weightObs * weightObs * 	 	
+                        weightTarget + 0.01 * (Math.random() - 0.5)); 	
+                    var w2dot = (a2 * weightObs * (1 - weightObs * weightObs) - 	
+                    this.gTarObs * weightTarget * weightTarget * 	 	
+                        weightTarget + 0.01 * (Math.random() - 0.5));	 	
+                    weightTarget += w1dot * this.timestep; 	
+                    weightObs += w2dot * this.timestep;
                 }
-                if (!(w1 < 1 && w1 > -1)) {
-                    w1 = 0.99;
+                if (!(weightTarget < 1 && weightTarget > -1)) {
+                    weightTarget = 0.99;
                 }
-                if (!(w2 < 1 && w2 > -1)) {
-                    w2 = 0.99;
+                if (!(weightObs < 1 && weightObs > -1)) {
+                    weightObs = 0.99;
                 }
-                return [w1, w2];
+                return [weightTarget, weightObs];
             },
             
             // Get the heading that the agent should be moving in
@@ -237,7 +241,7 @@
                 //fObs is always negative, so weightedObs is always negative, which is why it turns left all the time
 				weightedObs = (Math.abs(agent.weights[1]) * fObs); 
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
-                    weightedObs + 0.01*(Math.random()-0.5);
+                    -1 * weightedObs + 0.01*(Math.random()-0.5);
                 console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
                 return phiDot;
             },
@@ -274,6 +278,7 @@
                 this.world.agents.map(function(elem){
                     if(elem !== agent) {
                         obsCirc=new Circle(elem.position, elem.size);
+                        obsCirc2=new Circle(elem.position, elem.size-1);
                         //collision detection
                         dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                         if(dm<0){
@@ -281,6 +286,7 @@
                             agent.heading = this.computeAngle(agent.position, obsCirc.center);
                         }
                         this.envObs.push(obsCirc);
+                        this.envObs.push(obsCirc2);
                     }
                 }, this);
 
@@ -289,16 +295,20 @@
                         case "exterior":
                             switch(elem.direction){
                                 case 'n':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000000]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)-8000]), 8000);
                                     break;
                                 case 's':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000000]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)+8000]), 8000);
                                     break;
                                 case 'e':
-                                    obsCirc=new Circle($V([elem.position.e(1)+10000, elem.position.e(2)]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1)+10000000, elem.position.e(2)]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1)+8000, elem.position.e(2)]), 8000);
                                     break;
                                 case 'w':
-                                    obsCirc=new Circle($V([elem.position.e(1)-10000, elem.position.e(2)]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1)-10000000, elem.position.e(2)]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1)-8000, elem.position.e(2)]), 8000);
                                     break;
                             }
                             break;
@@ -715,7 +725,7 @@
                         !this.pathInvalid(this.pathHash[agent.id].path, agent) &&
                         this.pathHash[agent.id].goal.eql(agent.target)){
                         this.getNextTarget(agent);
-                    } else {
+                    } else if(agent.shouldReplan){
             			var gridSpacePos = this.grid.toGridSpace(agent.position),
             			    gridSpaceTar = this.grid.toGridSpace(agent.target),
             			    initial = new GridNavState(gridSpacePos.e(1), gridSpacePos.e(2), this.grid),
@@ -729,6 +739,10 @@
                                                        goal:agent.target
                                                       };
             			    agent.path = this.pathHash[agent.id].path;
+                        } else {
+                            agent.path = result;
+                            agent.interTarget = null;
+                            agent.failedLastPlan = true;    
                         }
                     }
                 }

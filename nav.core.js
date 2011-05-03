@@ -3,7 +3,7 @@
         this.world = world;
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);
-        this.debug = true;
+        this.debug = false;
 	}
 
     Nav.prototype = {
@@ -13,6 +13,13 @@
                 if(agents[i].strategy === "A*"){
                     this.aStar.execute(agents[i]);
                     agents[i].act();
+                    this.world.obstacles.filter(function(e){
+                        return e.type === 'fire';    
+                    }).forEach(function(e){
+                        if(e.position.distanceFrom(agents[i].position) <= e.size - agents[i].size){
+                            agents[i].takeDamage();
+                        }
+                    });
                 } else {
                     // Do DS
                     this.dynamical.execute(agents[i]);

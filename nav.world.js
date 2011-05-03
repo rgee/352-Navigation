@@ -17,12 +17,16 @@
         addWall: function(pos, length, orientation){
             var i;
             if(orientation === 'h'){
-                for(i = (pos.e(1) - length / 2) + 5; i < pos.e(1) + length / 2; i+=10){
-                    this.obstacles.push(new Nav.Obstacle('block',$V([i, pos.e(2)]),10 ));
+                i = (pos.e(1) - length / 2) + 5;
+                for(i; i < pos.e(1) + length / 2; i+=10){
+                    this.obstacles.push(new Nav.Obstacle('block',$V([i, pos.e(2)]), 10));
+                    this.obstacles.push(new Nav.Obstacle('block',$V([i, pos.e(2)]), 9));
                 }
             } else if(orientation === 'v'){
-                for(i = (pos.e(2) - length / 2)+5; i < pos.e(2) + length / 2; i+=10){
+                i = (pos.e(2) - length / 2) + 5;
+                for(i; i < pos.e(2) + length / 2; i+=10){
                     this.obstacles.push(new Nav.Obstacle('block', $V([pos.e(1), i]), 10));
+                    this.obstacles.push(new Nav.Obstacle('block', $V([pos.e(1), i]), 9));
                 }
             }
         },

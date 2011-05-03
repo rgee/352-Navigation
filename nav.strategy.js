@@ -40,10 +40,10 @@
             this.envObs = [];
             //Parameters
 
-            this.d0 = 500;
+            this.d0 = 800;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3.0;
+            this.a = 4;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -85,6 +85,7 @@
                     d = bigRad;
                 }
                 var theta=2*(Math.asin(bigRad/d));
+                //console.log(theta);
                 return theta;
             },
 
@@ -278,12 +279,14 @@
                 this.world.agents.map(function(elem){
                     if(elem !== agent) {
                         obsCirc=new Circle(elem.position, elem.size);
+                        obsCirc2=new Circle(elem.position, elem.size-1);
                         //collision detection
                         dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                         if(dm<0){
                             collision(agent, elem);
                             agent.heading = this.computeAngle(agent.position, obsCirc.center);
                         }
+                        this.envObs.push(obsCirc);
                         this.envObs.push(obsCirc);
                     }
                 }, this);
@@ -293,16 +296,20 @@
                         case "exterior":
                             switch(elem.direction){
                                 case 'n':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000000]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)-8000]), 8000);
                                     break;
                                 case 's':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000000]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)+8000]), 8000);
                                     break;
                                 case 'e':
-                                    obsCirc=new Circle($V([elem.position.e(1)+10000, elem.position.e(2)]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1)+10000000, elem.position.e(2)]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1)+8000, elem.position.e(2)]), 8000);
                                     break;
                                 case 'w':
-                                    obsCirc=new Circle($V([elem.position.e(1)-10000, elem.position.e(2)]), 10000);
+                                    obsCirc=new Circle($V([elem.position.e(1)-10000000, elem.position.e(2)]), 10000000);
+                                    obsCirc2=new Circle($V([elem.position.e(1)-8000, elem.position.e(2)]), 8000);
                                     break;
                             }
                             break;
@@ -321,6 +328,9 @@
                         while(agent.heading<-Math.PI){ agent.heading += 2*Math.PI}
                     }
                     this.envObs.push(obsCirc);
+                    if(elem.type==="exterior"){
+                        //this.envObs.push(obsCirc2);
+                    }
                 }, this);
             },
 
@@ -339,7 +349,7 @@
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
-                    console.log(pd + "\t" + agent.heading);
+                    //console.log(pd + "\t" + agent.heading);
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= (agent.size+5)){
@@ -376,7 +386,7 @@
         }
 
         WorldGrid.prototype = {
-            // Add an object at position pos.
+            // Add an object at position pos
             addObject: function(pos) {
                 var gridSpace = this.toGridSpace(pos);
 

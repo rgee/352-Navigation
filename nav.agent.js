@@ -43,11 +43,11 @@
 			}
 		},
         takeDamage: function(){
-            //if(this.health){
-            //    this.health -=  0.1;    
-            //    if(this.health < 0) this.health = 0;
-            //}
-            //this.alive = !!this.health;
+            if(this.health){
+                this.health -=  0.1;    
+                if(this.health < 0) this.health = 0;
+            }
+            this.alive = !!this.health;
         }
 	};
     

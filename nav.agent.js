@@ -103,8 +103,8 @@
        seekTarget: function(){
            if(this.assistMode){
                var hurtAgents = this.world.agents.filter(function(e){
-                  return e.health < 0.5; 
-               });
+                  return e.health < 0.5 && e !== this;
+               },this);
                
                var that = this;
                var healthComparator = function(a,b){

@@ -43,13 +43,13 @@
             this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 3;
+            this.a = 3.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
             this.aTar = 0.4;
             //advantage of going to target over obstacle
-            this.gTarObs = 0.01;
+            this.gTarObs = 0.05;
             this.timestep = 0.05;
 		}
 
@@ -57,7 +57,20 @@
 		Dynamical.prototype = {
             // Returns angle between an agent and a target
             computeAngle: function(aPos, tPos) {
-                return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
+                d=aPos.distanceFrom(tPos);
+                if(d==0){
+                    return 0;
+                }
+                else if(tPos.e(1)>=aPos.e(1)){
+                    return Math.asin((tPos.e(2)-aPos.e(2))/d)+Math.PI;
+                }
+                else if(tPos.e(2)>=aPos.e(2)){
+                    return Math.PI-Math.asin((tPos.e(2)-aPos.e(2))/d)+Math.PI;
+                }
+                else{
+                    return -(Math.PI/2) - Math.asin((aPos.e(1)-tPos.e(1))/d)+Math.PI;
+                }
+                //return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
             },
             // Returns delta Psi, the angle between the internal tangents of 
             // two circles.
@@ -122,7 +135,7 @@
             // The complete repeller function.
             // In Juan Pablo's code, this is fObsI
             fullRepellerFunc: function(phi, obs) {
-                var dist = this.distanceFunc(obs[0]),
+                var dist = this.distanceFunc(obs[0]);
                     win = this.windowFunc(phi, obs[1], obs[2]);
                     rep = this.repellerFunc(phi, obs[1], obs[2]);
                 return dist * win * rep;
@@ -207,6 +220,7 @@
                 var phi = agent.heading;
                 var fObs = 0;
                 var psiTar = this.computeAngle(agent.position, agent.target);
+                var paul = Math.atan2(agent.target.e(2) - agent.position.e(2), agent.target.e(1) - agent.position.e(1));
                 agent.weights = this.getWeights(phi, psiTar, agent.weights[0], 
                     agent.weights[1], perceivedObs); //of the form [wtar, wobs]
 				if (perceivedObs.length === 0) {
@@ -214,14 +228,17 @@
 				}
 				else {
 					fObs = perceivedObs.map(function(elem){
-						return this.fullRepellerFunc(phi, elem);
+                        var frf = this.fullRepellerFunc(phi, elem);
+						return frf;
 					}, this).reduce(function(prev, curr){
 						return prev + curr;
 					});
 				}
-				weightedObs = ((Math.abs(agent.weights[1]) * fObs));
+                //fObs is always negative, so weightedObs is always negative, which is why it turns left all the time
+				weightedObs = (Math.abs(agent.weights[1]) * fObs); 
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
                     weightedObs + 0.01*(Math.random()-0.5);
+                console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
                 return phiDot;
             },
 
@@ -295,7 +312,7 @@
                     dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                     if(dm<0){
                         collision(agent, elem);
-                        agent.heading = this.computeAngle(agent.position,obsCirc.center)+.1*(Math.random()-.5);
+                        agent.heading = this.computeAngle(agent.position,obsCirc.center);
                         while(agent.heading>Math.PI){ agent.heading -= 2*Math.PI}
                         while(agent.heading<-Math.PI){ agent.heading += 2*Math.PI}
                     }
@@ -318,7 +335,6 @@
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
-
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= (agent.size+5)){

@@ -3,9 +3,26 @@ $(document).ready(function(){
         world.agents = [];
         world.obstacles = [];
 
+    var computeAngle = function(aPos, tPos) {
+        d=aPos.distanceFrom(tPos);
+        if(d==0){
+            return 0;
+        }
+        else if(tPos.e(1)>=aPos.e(1)){
+            return Math.asin((tPos.e(2)-aPos.e(2))/d);
+        }
+        else if(tPos.e(2)>=aPos.e(2)){
+            return Math.PI-Math.asin((tPos.e(2)-aPos.e(2))/d);
+        }
+        else{
+            return -(Math.PI/2) - Math.asin((aPos.e(1)-tPos.e(1))/d);
+        }
+        //return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
+    };
+
     world.addAgent(new Nav.Agent($V([75,75]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([75,405]), $V([30,30]), 5, true));
-    //world.addAgent(new Nav.Agent($V([75,475]), $V([30,30]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([700,75]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([400,75]), $V([30,30]), 5, true));
     //top left is 50,50; bottom right is 750,550
@@ -26,9 +43,9 @@ $(document).ready(function(){
     world.agents.map(function(elem){
         target = $V([745,500]);
         elem.target = target; 
-        elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
+        elem.heading = computeAngle(elem.position, target);
+        //Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
     });
-
 
     var nav = new Nav(world);
     
@@ -77,6 +94,9 @@ $(document).ready(function(){
                 this.ellipseMode(3);
                 nav.dynamical.envObs.forEach(function(elem){
                     this.ellipse(elem.center.e(1), elem.center.e(2), elem.radius*2, elem.radius*2);
+                },this);
+                nav.world.agents.forEach(function(elem) {
+                    this.ellipse(elem.target.e(1), elem.target.e(2), 5, 5);
                 },this);
                 this.stroke(0,0,0);
                 this.fill();

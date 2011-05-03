@@ -42,10 +42,10 @@
 
             this.d0 = 800;
             this.c1 = 2.0;
-            this.c2 = 2.0;
-            this.a = 4;
+            this.c2 = 100.0;
+            this.a = 3.0;
             this.sigma = 0.2;
-            this.h1 = 20.0;
+            this.h1 = 100.0;
             //advantage of going towards target
             this.aTar = 0.4;
             //advantage of going to target over obstacle

@@ -19,17 +19,17 @@ $(document).ready(function(){
         }
     };
 
-    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([350,75]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([350,75]), $V([50,50]), 5, true));
     //top left is 50,50; bottom right is 750,550
     world.addWall($V([395,50]), 700, 'h');
     world.addWall($V([395,550]), 700, 'h');
     world.addWall($V([750,295]), 500, 'v');
     world.addWall($V([50,295]), 500, 'v');
-    world.addFire($V([400,300]));
+    world.addFire($V([50,50]));
     world.addWall($V([100,200]), 100, 'h');
     world.addWall($V([150,75]), 50, 'v');
     world.addWall($V([300,150]), 200, 'v');
@@ -40,7 +40,7 @@ $(document).ready(function(){
     world.addWall($V([600,300]), 300, 'h');
     world.addWall($V([500,500]), 100, 'v');
     world.agents.map(function(elem){
-        target = $V([720,100]);
+        target = $V([720,500]);
         elem.target = target; 
         elem.heading = computeAngle(elem.position, target);
     });

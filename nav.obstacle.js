@@ -11,8 +11,8 @@
                 this.size *= 1.01;
             }
 */
-            this.size *= 1.001
-            this.size += 2/this.size
+            this.size *= 1.001;
+            this.size += 2/this.size;
         }
     };
 

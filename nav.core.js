@@ -3,7 +3,7 @@
         this.world = world;
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);
-        this.debug = false;
+        this.debug = true;
 	}
 
     Nav.prototype = {

@@ -40,10 +40,10 @@
             this.envObs = [];
             //Parameters
 
-            this.d0 = 800;
+            this.d0 = 25;
             this.c1 = 2.0;
             this.c2 = 2.0;
-            this.a = 4;
+            this.a = 3.0;
             this.sigma = 0.2;
             this.h1 = 20.0;
             //advantage of going towards target
@@ -85,7 +85,6 @@
                     d = bigRad;
                 }
                 var theta=2*(Math.asin(bigRad/d));
-                //console.log(theta);
                 return theta;
             },
 
@@ -123,7 +122,7 @@
             // Repeller function. Gets the repelling power of an obstacle.
             // In Juan Pablo's code, this is R
             repellerFunc: function(phi, psi, dPsi) {
-                return (((phi - psi)/dPsi) *
+                return this.signum(((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi)));
             },
             
@@ -197,27 +196,23 @@
 
             // Gets the weight of a target and a repeller.
             // returns in the form [weight of targer, weight of obstacle]
-            getWeights: function(phi, psiTar, weightTarget, weightObs, perceivedObs) {
+            getWeights: function(phi, psiTar, w1, w2, perceivedObs) {
                 var a2 = this.alphaObs(phi, perceivedObs),
                     g21 = this.gammaObsTar(phi, psiTar, perceivedObs);
                 for (var i = 0; i < 100; i++) {
                     //w1 is target, w2 is obstacle
-                    var w1dot = (this.aTar * weightTarget * (1 - weightTarget *
-                        weightTarget) - g21 * weightObs * weightObs * 
-                        weightTarget + 0.01 * (Math.random() - 0.5));
-                    var w2dot = (a2 * weightObs * (1 - weightObs * weightObs) -
-                        this.gTarObs * weightTarget * weightTarget * 
-                        weightTarget + 0.01 * (Math.random() - 0.5));
-                    weightTarget += w1dot * this.timestep;
-                    weightObs += w2dot * this.timestep;
+                    var w1dot = (this.aTar * w1 * (1 - w1 * w1) - g21 * w2 * w2 * w1 + 0.01 * (Math.random() - 0.5));
+                    var w2dot = (a2 * w2 * (1 - w2 * w2) - this.gTarObs * w1 * w1 * w2 + 0.01 * (Math.random() - 0.5));
+                    w1 += w1dot * this.timestep;
+                    w2 += w2dot * this.timestep;
                 }
-                if (!(weightTarget < 1 && weightTarget > -1)) {
-                    weightTarget = 0.99;
+                if (!(w1 < 1 && w1 > -1)) {
+                    w1 = 0.99;
                 }
-                if (!(weightObs < 1 && weightObs > -1)) {
-                    weightObs = 0.99;
+                if (!(w2 < 1 && w2 > -1)) {
+                    w2 = 0.99;
                 }
-                return [weightTarget, weightObs];
+                return [w1, w2];
             },
             
             // Get the heading that the agent should be moving in
@@ -242,8 +237,8 @@
                 //fObs is always negative, so weightedObs is always negative, which is why it turns left all the time
 				weightedObs = (Math.abs(agent.weights[1]) * fObs); 
 				phiDot = (Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar)) + 
-                    -1 * weightedObs + 0.01*(Math.random()-0.5);
-                //console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs + "\t" + phiDot);
+                    weightedObs + 0.01*(Math.random()-0.5);
+                console.log(Math.abs(agent.weights[0]) * this.defAttractor(phi, psiTar) + "\t" + weightedObs + "\t" + fObs);
                 return phiDot;
             },
 
@@ -279,14 +274,12 @@
                 this.world.agents.map(function(elem){
                     if(elem !== agent) {
                         obsCirc=new Circle(elem.position, elem.size);
-                        obsCirc2=new Circle(elem.position, elem.size-1);
                         //collision detection
                         dm = agent.position.distanceFrom(obsCirc.center) - obsCirc.radius - agent.size;
                         if(dm<0){
                             collision(agent, elem);
                             agent.heading = this.computeAngle(agent.position, obsCirc.center);
                         }
-                        this.envObs.push(obsCirc);
                         this.envObs.push(obsCirc);
                     }
                 }, this);
@@ -296,20 +289,16 @@
                         case "exterior":
                             switch(elem.direction){
                                 case 'n':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000000]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)-8000]), 8000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000]), 10000);
                                     break;
                                 case 's':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000000]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)+8000]), 8000);
+                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000]), 10000);
                                     break;
                                 case 'e':
-                                    obsCirc=new Circle($V([elem.position.e(1)+10000000, elem.position.e(2)]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1)+8000, elem.position.e(2)]), 8000);
+                                    obsCirc=new Circle($V([elem.position.e(1)+10000, elem.position.e(2)]), 10000);
                                     break;
                                 case 'w':
-                                    obsCirc=new Circle($V([elem.position.e(1)-10000000, elem.position.e(2)]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1)-8000, elem.position.e(2)]), 8000);
+                                    obsCirc=new Circle($V([elem.position.e(1)-10000, elem.position.e(2)]), 10000);
                                     break;
                             }
                             break;
@@ -328,9 +317,6 @@
                         while(agent.heading<-Math.PI){ agent.heading += 2*Math.PI}
                     }
                     this.envObs.push(obsCirc);
-                    if(elem.type==="exterior"){
-                        //this.envObs.push(obsCirc2);
-                    }
                 }, this);
             },
 
@@ -349,7 +335,6 @@
                     var newX = agent.position.e(1) + this.timestep * xd,
                         newY = agent.position.e(2) + this.timestep * yd,
                         newHeading = oldHeading + this.timestep * pd;
-                    //console.log(pd + "\t" + agent.heading);
                     agent.heading = newHeading;
                     agent.position = $V([newX, newY]);
                     if(agent.position.distanceFrom(agent.target) <= (agent.size+5)){
@@ -386,7 +371,7 @@
         }
 
         WorldGrid.prototype = {
-            // Add an object at position pos
+            // Add an object at position pos.
             addObject: function(pos) {
                 var gridSpace = this.toGridSpace(pos);
 
@@ -435,32 +420,16 @@
                         break;
                     case 'fire':
                         // Approximate a circle on the grid by using the circumscribing square.
-                        var topLeft = $V([obs.position.e(1) - obs.size/2, obs.position.e(2) - obs.size/2]),
-                            bottomRight = $V([obs.position.e(1) + obs.size/2, obs.position.e(2) + obs.size/2]),
+                        var topLeft = $V([obs.position.e(1) - obs.size, obs.position.e(2) - obs.size]),
+                            bottomRight = $V([obs.position.e(1) + obs.size, obs.position.e(2) + obs.size]),
                             gridSpace;
                             
-                            for(var i = topLeft.e(1); i < topLeft.e(1) + obs.size; i += this.cellSize){
-                                if(this.isInWorldWS(i, topLeft.e(2))){
-                                    gridSpace = this.toGridSpace($V([i, topLeft.e(2)]));
-                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
-                                }
-                            }
-                            for(i = topLeft.e(2); i < topLeft.e(2) + obs.size; i += this.cellSize){
-                                if(this.isInWorldWS(i,topLeft.e(1))){
-                                    gridSpace = this.toGridSpace($V([topLeft.e(1), i]));
-                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;    
-                                }
-                            }
-                            for(var j = bottomRight.e(1); j > bottomRight.e(1) - obs.size; j -= this.cellSize){
-                                if(this.isInWorldWS(j, bottomRight.e(2))){
-                                    gridSpace = this.toGridSpace($V([j, bottomRight.e(2)]));
-                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
-                                }
-                            }
-                            for(j = bottomRight.e(2); j > bottomRight.e(2) - obs.size; j -= this.cellSize){
-                                if(this.isInWorldWS(bottomRight.e(1), j)){
-                                    gridSpace = this.toGridSpace($V([bottomRight.e(1), j]));
-                                    this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;    
+                            for(var i = topLeft.e(1);  i < bottomRight.e(1); i += this.cellSize){
+                                for(var j = topLeft.e(2); j < bottomRight.e(2); j+= this.cellSize){
+                                    if(this.isInWorldWS(i,j)){
+                                        gridSpace = this.toGridSpace($V([i, j]));    
+                                        this.data[gridSpace.e(1)][gridSpace.e(2)] = 1;
+                                    }
                                 }
                             }
                         break;

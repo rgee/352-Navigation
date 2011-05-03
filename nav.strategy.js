@@ -40,7 +40,7 @@
             this.envObs = [];
             //Parameters
 
-            this.d0 = 25;
+            this.d0 = 500;
             this.c1 = 2.0;
             this.c2 = 2.0;
             this.a = 3.0;
@@ -122,7 +122,7 @@
             // Repeller function. Gets the repelling power of an obstacle.
             // In Juan Pablo's code, this is R
             repellerFunc: function(phi, psi, dPsi) {
-                return this.signum(((phi - psi)/dPsi) *
+                return (((phi - psi)/dPsi) *
                     Math.exp(1 - Math.abs((phi - psi)/dPsi)));
             },
             

@@ -17,7 +17,6 @@ $(document).ready(function(){
         else{
             return -(Math.PI/2) - Math.asin((aPos.e(1)-tPos.e(1))/d);
         }
-        //return Math.atan2(tPos.e(2) - aPos.e(2), tPos.e(1) - aPos.e(1))+Math.PI;
     };
 
     world.addAgent(new Nav.Agent($V([75,75]), $V([30,30]), 5, true));
@@ -42,10 +41,9 @@ $(document).ready(function(){
     world.addWall($V([500,500]), 100, 'v');*/
     world.addExt($V([399,50]), 800, 'n');
     world.agents.map(function(elem){
-        target = $V([745,500]);
+        target = $V([740,500]);
         elem.target = target; 
         elem.heading = computeAngle(elem.position, target);
-        //Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
     });
 
     var nav = new Nav(world);

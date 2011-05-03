@@ -371,7 +371,7 @@
         }
 
         WorldGrid.prototype = {
-            // Add an object at position pos.
+            // Add an object at position pos
             addObject: function(pos) {
                 var gridSpace = this.toGridSpace(pos);
 

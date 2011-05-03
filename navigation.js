@@ -21,7 +21,7 @@ $(document).ready(function(){
     };
 
     world.addAgent(new Nav.Agent($V([75,75]), $V([30,30]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,405]), $V([30,30]), 5, true));
+/*    world.addAgent(new Nav.Agent($V([75,405]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([75,475]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([700,75]), $V([30,30]), 5, true));
     world.addAgent(new Nav.Agent($V([400,75]), $V([30,30]), 5, true));
@@ -39,7 +39,8 @@ $(document).ready(function(){
     world.addWall($V([500,100]), 100, 'v');
     world.addWall($V([500,150]), 200, 'h');
     world.addWall($V([600,300]), 300, 'h');
-    world.addWall($V([500,500]), 100, 'v');
+    world.addWall($V([500,500]), 100, 'v');*/
+    world.addExt($V([399,50]), 800, 'n');
     world.agents.map(function(elem){
         target = $V([745,500]);
         elem.target = target; 
@@ -110,7 +111,8 @@ $(document).ready(function(){
                 case 37:
                     nav.world.agents.map(function(elem){
                         elem.target = target; 
-                        elem.heading = Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
+                        elem.heading = computeAngle(elem.position, target);
+                        //Math.atan2(target.e(2) - elem.position.e(2), target.e(1) - elem.position.e(1));
                     });
                     break;
                 case 39:

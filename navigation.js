@@ -19,17 +19,17 @@ $(document).ready(function(){
         }
     };
 
-    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([325,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([440,75]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 5, false));
-    world.addAgent(new Nav.Agent($V([375,375]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([325,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([440,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([375,375]), $V([50,50]), 5, true));
     world.addAgent(new Nav.SupportAgent($V([125,75]), $V([50,50]), 5, true, world));
-    world.addAgent(new Nav.Agent($V([90,420]), $V([50,50]), 5, false));   
-    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 5, false));   
+    world.addAgent(new Nav.Agent($V([90,420]), $V([50,50]), 5, true));   
+    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 5, true));   
 
     //top left is 50,50; bottom right is 750,550
     world.addWall($V([395,50]), 700, 'h');
@@ -134,7 +134,8 @@ $(document).ready(function(){
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.ellipseMode(0);
-            this.fill(255, agent.health*255 ,agent.health*255 );
+            if(agent.assistMode){ this.fill((1-agent.health)*255,0,agent.health*255);}
+            else {this.fill(255, agent.health*255 ,agent.health*255 );}
             this.ellipse(agent.position.e(1) - 5, agent.position.e(2) - 5, agent.size*2, agent.size*2);
             
             if(agent.target !== null) {

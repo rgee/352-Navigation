@@ -19,11 +19,18 @@ $(document).ready(function(){
         }
     };
 
-    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, true));
-    world.addAgent(new Nav.Agent($V([350,75]), $V([50,50]), 5, true));
+    world.addAgent(new Nav.Agent($V([75,75]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([75,405]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([75,475]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([700,75]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([325,75]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([440,75]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([400,400]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([375,375]), $V([50,50]), 5, false));
+    world.addAgent(new Nav.Agent($V([125,75]), $V([50,50]), 5, false));   
+    world.addAgent(new Nav.Agent($V([90,420]), $V([50,50]), 5, false));   
+    world.addAgent(new Nav.Agent($V([200,200]), $V([50,50]), 5, false));   
+    world.addAgent(new Nav.Agent($V([135,70]), $V([50,50]), 5, false));      
     //top left is 50,50; bottom right is 750,550
     world.addWall($V([395,50]), 700, 'h');
     world.addWall($V([395,550]), 700, 'h');
@@ -166,17 +173,6 @@ $(document).ready(function(){
         // Draw an obstacle in the world
         proc.drawObstacle = function(obstacle) {
             switch(obstacle.type){
-                case 'exterior':
-                    this.rectMode(3);
-                    this.noStroke();
-                    this.fill(255,255,255);
-                    if(obstacle.direction == 'n' || obstacle.direction == 's'){
-                        this.rect(obstacle.position.e(1), obstacle.position.e(2), obstacle.size, 10);
-                    } else {
-                        this.rect(obstacle.position.e(1), obstacle.position.e(2), 10, obstacle.size);   
-                    }
-                    this.stroke(0,0,0);
-                    break;
                 case 'block':
                     this.noStroke();
                     this.fill(255,255,255);

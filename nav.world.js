@@ -31,14 +31,6 @@
             }
         },
 
-        // Add an exterior wall to bound the world.
-        // Exterior walls are defined by their midpoint, size (length) and cardinal direction
-        addExt: function(pos, length, direction) {
-            obj = (new Nav.Obstacle('exterior', pos, length));
-            obj.direction = direction;
-            this.obstacles.push(obj);
-        },
-
         // Add a fire to the world that grows over time.
         // Fires are defined by their center position and starting radius
         addFire: function(pos) {

@@ -292,26 +292,6 @@
 
                 this.world.obstacles.map(function(elem){
                     switch(elem.type) {
-                        case "exterior":
-                            switch(elem.direction){
-                                case 'n':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)-10000000]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)-8000]), 8000);
-                                    break;
-                                case 's':
-                                    obsCirc=new Circle($V([elem.position.e(1), elem.position.e(2)+10000000]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1), elem.position.e(2)+8000]), 8000);
-                                    break;
-                                case 'e':
-                                    obsCirc=new Circle($V([elem.position.e(1)+10000000, elem.position.e(2)]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1)+8000, elem.position.e(2)]), 8000);
-                                    break;
-                                case 'w':
-                                    obsCirc=new Circle($V([elem.position.e(1)-10000000, elem.position.e(2)]), 10000000);
-                                    obsCirc2=new Circle($V([elem.position.e(1)-8000, elem.position.e(2)]), 8000);
-                                    break;
-                            }
-                            break;
                         case "block":
                             obsCirc=new Circle(elem.position, elem.size);
                             break;

@@ -36,7 +36,6 @@ $(document).ready(function(){
     world.addWall($V([395,550]), 700, 'h');
     world.addWall($V([750,295]), 500, 'v');
     world.addWall($V([50,295]), 500, 'v');
-    world.addFire($V([50,50]));
     world.addWall($V([100,200]), 100, 'h');
     world.addWall($V([150,75]), 50, 'v');
     world.addWall($V([300,150]), 200, 'v');
@@ -66,7 +65,7 @@ $(document).ready(function(){
             this.fill(255,255,255);
             nav.world.agents.map(this.drawAgent, this);
 
-            if(nav.debug){
+            if(nav.debug || document.getElementById("debug").checked) {
                 this.drawDebugInfo();
             } else {
                 nav.world.obstacles.map(this.drawObstacle, this);   

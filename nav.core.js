@@ -1,5 +1,5 @@
 (function(global) {
-	function Nav( world){
+	function Nav(world){
         this.world = world;
         this.aStar = new Nav.Strategy.AStar(this.world);
         this.dynamical = new Nav.Strategy.Dynamical(this.world);

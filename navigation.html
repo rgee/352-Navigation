@@ -1,7 +1,8 @@
  <html>
     <head>
-        <script src="jquery-1.5.1.js" type="text/javascript"></script>
-        <script src="processing-1.1.0.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"
+            type="text/javascript"></script>
+        <script src="processing-1.2.3-api.min.js" type="text/javascript"></script>
 		<script src="sylvester.src.js" type="text/javascript"></script>
         <script src="heap.js" type="text/javascript"></script>
         <script src="jshashtable-2.1.js" type="text/javascript"></script>
@@ -18,9 +19,35 @@
         <div id="content">
 			<h1> Embodied-Agent Navigation </h1>
             <canvas id="display" width="800" height="600">
-                Your browser does not support HTML5 Canvas objects. This is required for our graphics demonstration.
-                Please use the latest version of Chrome, Firefox, Safari or Opera.
+                Your browser does not support HTML5 Canvas objects. 
+                This is required for our graphics demonstration.
+                Please use the latest version of Chrome, Firefox, Safari or 
+                Opera.
             </canvas>
+            <div class="controls">
+                <span class="control_desc">Debug mode:</span>
+                <input id="debug" type="checkbox">
+                <span class="control_desc">Type:</span>
+                <select id="type">
+                    <option value="wall">
+                    <option value="agent">
+                    <option value="fire">
+                    <option value="goal">
+                </select>
+                <div id="agent_opts">
+                    <span class="control_desc">Agent Type:</span>
+                    <select id="agent_type">
+                        <option value="normal">
+                        <option value="support">
+                    </select>
+                </div>
+                <div id="obs_opts">
+                    <span class="control_desc">Obstacle width:<span>
+                    <input id="obs_width" type="text">
+                    <span class="control_desc">Obstacle height:</span>
+                    <input id="obs_height" type="text">
+               </div> 
+            </div>
         </div>
     </body>
 </html>

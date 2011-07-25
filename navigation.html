@@ -1,5 +1,6 @@
  <html>
     <head>
+        <title>Embodied-Agent Navigation</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"
             type="text/javascript"></script>
         <script src="processing-1.2.3-api.min.js" type="text/javascript"></script>
@@ -24,30 +25,30 @@
                 Please use the latest version of Chrome, Firefox, Safari or 
                 Opera.
             </canvas>
-            <div class="controls">
+            <form class="controls">
                 <span class="control_desc">Debug mode:</span>
                 <input id="debug" type="checkbox">
                 <span class="control_desc">Type:</span>
                 <select id="type">
-                    <option value="wall">
-                    <option value="agent">
-                    <option value="fire">
-                    <option value="goal">
+                    <option value="wall">Wall</option>
+                    <option value="agent">Agent</option>
+                    <option value="fire">Fire</option>
+                    <option value="target">Goal</option>
                 </select>
                 <div id="agent_opts">
                     <span class="control_desc">Agent Type:</span>
                     <select id="agent_type">
-                        <option value="normal">
-                        <option value="support">
+                        <option value="normal">Normal</option>
+                        <option value="support">Support</option>
                     </select>
                 </div>
                 <div id="obs_opts">
                     <span class="control_desc">Obstacle width:<span>
-                    <input id="obs_width" type="text">
+                    <input id="obs_width" size="5" type="text">
                     <span class="control_desc">Obstacle height:</span>
-                    <input id="obs_height" type="text">
+                    <input id="obs_height" size="5" type="text">
                </div> 
-            </div>
+            </form>
         </div>
     </body>
 </html>

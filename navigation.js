@@ -128,7 +128,8 @@ $(document).ready(function(){
         
         // Draw an agent in the world.
         proc.drawAgent = function(agent){
-            if(agent.path !== null){
+            if(agent.path !== null && 
+                (nav.debug || document.getElementById("debug").checked)) {
                 this.drawPath(agent.path, nav.aStar.grid);
             }
             this.ellipseMode(0);
@@ -143,7 +144,7 @@ $(document).ready(function(){
                 }
                 this.ellipseMode(0);
                 this.fill(100, 255, 65);
-                this.ellipse(pos.e(1) * nav.aStar.grid.cellSize, pos.e(2) * nav.aStar.grid.cellSize, 10, 10);
+                this.ellipse(pos.e(1), pos.e(2), 10, 10);
             }
         };
 
